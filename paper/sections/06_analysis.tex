@@ -1,0 +1,36 @@
+\section{Analysis and Ablations}
+\label{sec:analysis}
+
+\subsection{Why Not Only Reweighting?}
+
+The reported baseline in Beyond the Majority shows that conventional re-sampling gives little benefit on \liberocorelt{}: the original distribution obtains 26.5\%, while several re-sampling exponents range from 25.1\% to 27.1\%~\cite{zhu2026beyond}. Our own iterations point in the same direction. Increasing rare-task pressure can wake up some tail behaviors, but it also causes forgetting in semantically adjacent tasks. RBTAD therefore treats rare-aware weighting as a support mechanism, not the core contribution.
+
+\subsection{Failed Iterations Are Diagnostic}
+
+\begin{table}[t]
+  \centering
+  \caption{Selected internal iterations on \liberocorelt{}. These are not all proposed as final methods; they summarize the design path and motivate the final end-to-end RBTAD choice.}
+  \label{tab:iterations}
+  \begin{tabular}{lcl}
+    \toprule
+    Method variant & Success & Interpretation \\
+    \midrule
+    RCTAD & 35.0\% & Counterfactual loss without enough rare positive signal \\
+    RBTAD & 40.0\% & Best end-to-end training result so far \\
+    Relation-anchor negatives & 37.0\% & Sharper relation contrast hurt useful tail behavior \\
+    Tail-only rescue fine-tune & 34.0\% & Post-hoc rare pressure caused forgetting \\
+    Anchor fine-tune & 33.0\% & Constraint did not prevent task competition \\
+    Selective projector merge & 42.0\% & Useful diagnostic, not used as main method \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Table~\ref{tab:iterations} summarizes several method attempts. The strongest raw number, a selective projector merge, is deliberately not used as the main method because it is a post-training weight-space edit rather than an end-to-end training method. Its value is diagnostic: it shows that success can be transferred between task groups by small changes in the action projection pathway, but such edits are brittle and task-specific. RBTAD is the cleaner method because it optimizes the desired conditional action boundary during training.
+
+\subsection{Head and Tail Behavior}
+
+In the \liberocorefull{} controlled comparison, the first three tasks move from an average of 66.7\% to 67.3\%, while tasks 4--10 move from 32.6\% to 42.9\%. This pattern supports the intended effect: the method mainly helps the harder task group instead of merely improving head tasks. On \liberocorelt{}, RBTAD still fails on the hardest wine-bottle-to-rack task, showing that task-conditioned discrimination is not a complete solution to rare relation grounding.
+
+\subsection{What the Method Does Not Claim}
+
+RBTAD does not claim that every wrong-target action is impossible. It also does not claim to solve long-tailed robotic imitation by reweighting alone. The core claim is narrower: in states where the demonstrated action should be task-conditioned, a VLA policy should prefer the correct task/action pairing over a plausible counterfactual task/action pairing. The diagnostic and current experiments support this claim, while the remaining failures motivate better eligibility selection and broader long-tail splits.

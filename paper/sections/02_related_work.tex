@@ -1,0 +1,13 @@
+\section{Related Work}
+
+\paragraph{Vision-language-action policies.}
+VLA policies train multimodal models to condition robot actions on visual observations and language instructions. OpenVLA~\cite{kim2024openvla}, Octo~\cite{octo2024}, RT-1~\cite{brohan2022rt1}, and related systems demonstrate that large policy models can absorb diverse manipulation data and transfer across tasks. Smaller or more efficient VLA variants such as miniVLA~\cite{belkhale2024minivla} reduce the cost of fine-tuning and evaluation. Our work studies a fine-tuning-time failure mode of such policies under long-tailed task distributions.
+
+\paragraph{Long-tailed recognition and rebalancing.}
+Long-tailed visual recognition has developed a large family of re-sampling, re-weighting, classifier decoupling, and representation learning methods~\cite{zhang2023deep,kang2019decoupling,cui2019classbalanced}. These methods address imbalanced supervision in classification, where the final prediction is a discrete category. Long-tailed robot imitation is different: each task requires continuous action generation, and tail failures may arise from spatial grounding or language-action binding rather than only a biased classifier prior. We therefore use reweighting only as a modest positive-signal correction, not as the main mechanism.
+
+\paragraph{Long-tailed robotic imitation learning.}
+Beyond the Majority~\cite{zhu2026beyond} introduces \liberocorelt{} and shows that standard re-sampling is ineffective for miniVLA fine-tuning. It diagnoses target-approach failures and proposes APA, which creates approach-phase demonstrations by transferring head-task approach segments to tail objects. Our method is complementary but different in mechanism. Rather than generating positive approach trajectories or rewriting all tasks into a phase-structured instruction format, we regularize the conditional action likelihood under counterfactual task instructions.
+
+\paragraph{Contrastive and counterfactual objectives.}
+Contrastive training encourages models to distinguish compatible pairs from incompatible ones. In language-conditioned robotics, this principle is attractive because the same image and action can be paired with different task descriptions, exposing whether the policy truly uses the instruction. TCAD uses this idea at the action-likelihood level: it contrasts the expert action under the correct task against the same action under a wrong-target task. Unlike hard unlikelihood training, our loss is a mild margin ranking loss, which reduces the risk of penalizing shared early approach actions that may be plausible for multiple tasks.

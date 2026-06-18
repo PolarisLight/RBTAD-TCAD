@@ -1,0 +1,33 @@
+\section{Diagnostic: Task-Conditioned Action Ambiguity}
+\label{sec:diagnostic}
+
+We first ask whether a behavior-cloned long-tail policy actually prefers correct task/action pairings. Let $o_t$ be the observation, $\ell$ the language instruction, and $a_t$ the expert action. For a counterfactual wrong-target instruction $\ell^{-}$, we compute
+\begin{equation}
+  \Delta(o_t, a_t, \ell, \ell^{-}) =
+  \log p_\theta(a_t \mid o_t, \ell) -
+  \log p_\theta(a_t \mid o_t, \ell^{-}).
+\end{equation}
+A positive margin means the model assigns higher likelihood to the demonstrated action under the correct instruction. A non-positive margin indicates that the model is indifferent to, or even prefers, the wrong task description for the same expert action.
+
+\paragraph{Setup.}
+We use a miniVLA behavior-cloning checkpoint fine-tuned on \liberocorelt{}. We sample 200 pre-contact states and construct wrong-target instructions by replacing the target object or target relation with a plausible alternative from the task set. This diagnostic is deliberately conservative: it does not modify images or actions, and it does not assume the counterfactual action is globally impossible. It only tests whether the model has learned a local preference for the demonstrated task/action pairing.
+
+\begin{table}[t]
+  \centering
+  \caption{Instruction-swap margin diagnostic on a behavior-cloned \liberocorelt{} baseline. Negative margins indicate that the model does not prefer the correct instruction over a wrong-target instruction for the same observation and expert action.}
+  \label{tab:diagnostic}
+  \begin{tabular}{lccc}
+    \toprule
+    Split & Samples & Mean margin & Positive margin rate \\
+    \midrule
+    All sampled states & 200 & -0.4787 & 35.5\% \\
+    Tail-heavy relation tasks & 44 & -1.0950 & 18.2\% \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Observation.}
+Table~\ref{tab:diagnostic} shows that the mean margin is negative and that only 35.5\% of samples have a positive margin. The effect is stronger on relation-heavy tail tasks such as placing an object on a rack, in a bowl, or on top of a cabinet. This supports the view that long-tail degradation is not only a frequency problem. The policy can see a familiar scene and action yet fail to condition that action on the correct task language.
+
+\paragraph{Implication for method design.}
+The diagnostic also warns against an overly aggressive contrastive objective. Some early approach actions may be shared by multiple tasks, so treating every wrong-target pair as a hard negative could introduce false negatives. TCAD therefore uses a mild margin loss, applies it to a subset of eligible samples, and keeps the original behavior cloning objective as the main learning signal.

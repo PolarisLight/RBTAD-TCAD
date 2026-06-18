@@ -1,0 +1,20 @@
+\section{Draft Status and Reproducibility Notes}
+
+\paragraph{Current confirmed artifacts.}
+The current \liberocorelt{} RBTAD result uses checkpoint
+\path{runs/rbtad_lt_main/rbtad_w3_tail9_confmedian_seed7_b20/checkpoints/step-034075-epoch-36-loss=0.0678.pt}
+and evaluation directory
+\path{results/rbtad_lt_main/rbtad_w3_tail9_confmedian_seed7_b20/034075/rbtad_step034075_30trials_egl_20260610_014339}.
+
+The controlled \liberocorefull{} baseline result uses evaluation directory
+\path{results/core_full_protocol/baseline_libero_core_full_protocol_seed7_b20/100000/baseline_libero_core_full_50trials_egl_20260614_175019}.
+The TCAD-trained \liberocorefull{} result uses
+\path{results/core_full_protocol/rbtad_libero_core_full_alltcad_protocol_seed7_b20/101071/rbtad_libero_core_full_50trials_egl_20260617_003121}.
+
+\paragraph{Experiments to finish before a stronger arXiv revision.}
+\begin{itemize}[leftmargin=*]
+  \item Re-run or verify the \liberocorelt{} BC baseline under the exact same local evaluation pipeline as RBTAD.
+  \item Add at least two more seeds for RBTAD on \liberocorelt{}.
+  \item Complete \liberospatiallt{} data construction, then train and evaluate BC baseline and RBTAD under the same protocol.
+  \item Replace the \liberospatiallt{} in-progress row before public submission if the draft is intended as a polished arXiv version rather than a lab preprint.
+\end{itemize}

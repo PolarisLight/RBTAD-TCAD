@@ -1,0 +1,114 @@
+\section{Method}
+\label{sec:method}
+
+We study supervised VLA fine-tuning on a long-tailed imitation dataset
+\begin{equation}
+  \mathcal{D} = \{(o_t, \ell_i, a_t, i)\},
+\end{equation}
+where $i$ indexes the task, $\ell_i$ is the instruction, $o_t$ is the multimodal observation, and $a_t$ is the expert action. A baseline policy is trained by behavior cloning:
+\begin{equation}
+  \mathcal{L}_{\mathrm{BC}}
+  = - \mathbb{E}_{(o_t,\ell_i,a_t) \sim \mathcal{D}}
+  \log p_\theta(a_t \mid o_t,\ell_i).
+\end{equation}
+
+\begin{figure}[t]
+  \centering
+  \begin{tikzpicture}[
+    font=\small,
+    box/.style={draw=#1!70!black, rounded corners=2pt, thick, fill=#1!8, inner sep=6pt, align=left},
+    arrow/.style={-{Latex[length=2mm]}, thick, draw=black!55},
+    tealbox/.style={draw=teal!70!black, rounded corners=2pt, fill=teal!8, inner sep=4pt, align=left},
+    orangebox/.style={draw=orange!80!black, rounded corners=2pt, fill=orange!10, inner sep=4pt, align=left}
+  ]
+    \node[box=gray, text width=0.26\linewidth] (bc) {
+      \textbf{1. Behavior cloning}\\[2pt]
+      Training sample: $(o_t,\ell_i,a_t)$\\[2pt]
+      \[
+        \mathcal{L}_{\mathrm{BC}}
+        =-\log p_\theta(a_t\mid o_t,\ell_i)
+      \]
+      learns expert action likelihood under the given task instruction.
+    };
+
+    \node[box=teal, text width=0.29\linewidth, right=0.55cm of bc] (pair) {
+      \textbf{2. Counterfactual instruction pair}\\[2pt]
+      Keep the same observation and action:
+      $(o_t,a_t)$\\[3pt]
+      \begin{tikzpicture}[font=\scriptsize]
+        \node[tealbox, text width=0.88\linewidth] (pos) {correct instruction $\ell_i$\\score $s^+=\log p_\theta(a_t\mid o_t,\ell_i)$};
+        \node[orangebox, text width=0.88\linewidth, below=3pt of pos] (neg) {wrong-target instruction $\ell_i^-$\\score $s^-=\log p_\theta(a_t\mid o_t,\ell_i^-)$};
+      \end{tikzpicture}\\[-2pt]
+      The negative changes the task target, not the image or expert action.
+    };
+
+    \node[box=orange, text width=0.30\linewidth, right=0.55cm of pair] (loss) {
+      \textbf{3. Training objective}\\[2pt]
+      \[
+      \begin{aligned}
+        \mathcal{L} &=
+        \mathbb{E}[w_i\mathcal{L}_{\mathrm{BC}}] \\
+        &\quad + \lambda [m-(s^+-s^-)]_+ .
+      \end{aligned}
+      \]
+      Rare tasks use a capped positive weight $w_i$.\\[2pt]
+      TCAD is applied only to eligible sampled pairs.\\[2pt]
+      \textbf{Inference:} unchanged VLA policy,
+      no generator, detector, or extra module.
+    };
+
+    \draw[arrow] (bc) -- (pair);
+    \draw[arrow] (pair) -- (loss);
+  \end{tikzpicture}
+  \caption{Method overview. RBTAD keeps the standard behavior-cloning pathway, but adds a counterfactual instruction pair during training. For the same observation and expert action, TCAD encourages the correct instruction score $s^+$ to exceed the wrong-instruction score $s^-$ by a mild margin, while rare-aware behavior cloning prevents tail positive demonstrations from being drowned out. The learned policy has the same inference architecture and cost as the baseline.}
+  \label{fig:method}
+\end{figure}
+
+\subsection{Rare-Aware Behavior Cloning}
+
+Let $n_i$ be the number of demonstrations for task $i$. Long-tailed fine-tuning can under-train rare positive behaviors because gradients from head tasks dominate the update stream. We use a capped task weight
+\begin{equation}
+  w_i =
+  \begin{cases}
+    w_{\mathrm{rare}}, & n_i \le \tau,\\
+    1, & n_i > \tau,
+  \end{cases}
+\end{equation}
+where $\tau$ is a rare-task threshold and $w_{\mathrm{rare}}$ is moderate. In our \liberocorelt{} run we use $\tau=9$ and $w_{\mathrm{rare}}=3.0$. This component is intentionally simple. It does not try to solve the full problem by re-sampling; it only prevents rare positive demonstrations from being numerically drowned out.
+
+\subsection{Task-Conditioned Action Discrimination}
+
+For an eligible sample, we construct a counterfactual instruction $\ell_i^{-}$ that changes the task target while keeping the observation and expert action fixed. We then compare the action likelihood under the correct and counterfactual instructions:
+\begin{align}
+  s^+ &= \log p_\theta(a_t \mid o_t,\ell_i),\\
+  s^- &= \log p_\theta(a_t \mid o_t,\ell_i^{-}).
+\end{align}
+TCAD penalizes the model when the correct score does not exceed the negative score by a margin $m$:
+\begin{equation}
+  \mathcal{L}_{\mathrm{TCAD}}
+  =
+  \mathbb{E}
+  \left[
+  \max(0, m - (s^+ - s^-))
+  \right].
+\end{equation}
+The final objective is
+\begin{equation}
+  \mathcal{L}
+  =
+  \mathbb{E}\left[w_i \mathcal{L}_{\mathrm{BC}}\right]
+  +
+  \lambda \mathcal{L}_{\mathrm{TCAD}}.
+\end{equation}
+
+\subsection{Negative Instruction Construction}
+
+The negative instruction should be plausible enough to test task grounding, but not so broad that it creates many false negatives. In the current implementation, we use task-level instruction templates and replace the manipulated object or target receptacle with a semantically adjacent alternative from the same benchmark task set. For example, an instruction about placing the wine bottle on the rack can be contrasted with a similar instruction about placing it on top of the cabinet. If no valid replacement is available, the sample is skipped.
+
+\subsection{Eligibility and Mildness}
+
+TCAD is not applied to all tokens and all states. We use a sampling ratio $\rho$ and a confidence gate based on the batch median to keep the regularizer mild. The main \liberocorelt{} setting uses $\lambda=0.1$, $\rho=0.5$, and margin $m=0.2$. This choice reflects the diagnostic in Section~\ref{sec:diagnostic}: wrong-target pairs are informative, but some early actions may be shared across tasks. A mild ranking loss is therefore safer than hard unlikelihood or all-state negative training.
+
+\subsection{Computational Cost}
+
+RBTAD modifies only the training objective. It adds a second forward pass for selected negative instruction pairs during fine-tuning, but the learned policy has the same architecture and inference cost as the baseline. No detector, segmenter, image generator, or trajectory generator is introduced.

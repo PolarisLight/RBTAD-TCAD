@@ -1,0 +1,67 @@
+﻿\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{times}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{xurl}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{placeins}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,calc}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!55!black,
+  citecolor=blue!55!black,
+  urlcolor=blue!55!black
+}
+
+\newcommand{\method}{RBTAD}
+\newcommand{\tcad}{TCAD}
+\newcommand{\ours}{\method{}}
+\newcommand{\liberocorelt}{LIBERO-Core-LT}
+\newcommand{\liberocorefull}{LIBERO-Core-Full}
+\newcommand{\liberospatiallt}{LIBERO-Spatial-LT}
+
+\title{Task-Conditioned Action Discrimination for Long-Tailed Vision-Language-Action Policies}
+
+\author{
+Yan-Hao Chen\\ % 陈颜皓
+\texttt{cyhao@stu.xmu.edu.cn}
+}
+
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\input{sections/00_abstract}
+\end{abstract}
+
+\input{sections/01_introduction}
+\input{sections/02_related_work}
+\input{sections/03_diagnostic}
+\FloatBarrier
+\input{sections/04_method}
+\FloatBarrier
+\input{sections/05_experiments}
+\FloatBarrier
+\input{sections/06_analysis}
+\input{sections/07_limitations}
+\input{sections/08_conclusion}
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\appendix
+\input{sections/a_appendix}
+
+\end{document}
+

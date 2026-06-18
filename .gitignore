@@ -1,0 +1,38 @@
+# Large transfer archives and generated environments
+code/transfer/
+*.tgz
+*.tar
+*.tar.gz
+*.zip
+
+# Python caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# LaTeX build products
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.fdb_latexmk
+paper/*.fls
+paper/*.log
+paper/*.out
+paper/*.synctex.gz
+
+# Redundant manuscript PDFs
+paper/main.pdf
+paper/rbtad_tcad_arxiv_draft.pdf
+
+# Reference material from the APA paper
+code/2602.06512.pdf
+code/2602.06512.txt
+paper/figures/_apa_reference_pages/
+
+# Large raster exports and superseded figures
+paper/figures/rbtad/*.tiff
+paper/figures/rbtad/fig1_problem_diagnostic.*
+paper/figures/rbtad/fig4_main_results.*
+paper/figures/rbtad/fig5_corefull_control.*
+paper/figures/rbtad/figS_iterations.*
+paper/figures/rbtad/fig3_method_framework_imagegen_draft.png

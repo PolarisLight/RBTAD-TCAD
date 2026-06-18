@@ -1,0 +1,48 @@
+figure,panel,dataset,method_or_group,task,value,unit,notes
+fig1,a,LIBERO-Core-LT,demo_count,1,46,demos,head task
+fig1,a,LIBERO-Core-LT,demo_count,2,28,demos,head task
+fig1,a,LIBERO-Core-LT,demo_count,3,19,demos,head task
+fig1,a,LIBERO-Core-LT,demo_count,4,15,demos,tail task
+fig1,a,LIBERO-Core-LT,demo_count,5,11,demos,tail task
+fig1,a,LIBERO-Core-LT,demo_count,6,9,demos,tail task
+fig1,a,LIBERO-Core-LT,demo_count,7,8,demos,tail task
+fig1,a,LIBERO-Core-LT,demo_count,8,7,demos,tail task
+fig1,a,LIBERO-Core-LT,demo_count,9,6,demos,tail task
+fig1,a,LIBERO-Core-LT,demo_count,10,5,demos,tail task
+fig1,b,LIBERO-Core-LT,all_states,all,35.5,percent positive margin,n=200; mean margin=-0.4787
+fig1,b,LIBERO-Core-LT,relation_tail,tail-heavy,18.2,percent positive margin,n=44; mean margin=-1.0950
+fig4,a,LIBERO-Core-LT,BC original distribution,all,26.5,percent success,reported by Beyond the Majority
+fig4,a,LIBERO-Core-LT,re-sampling q=0.75,all,25.1,percent success,reported by Beyond the Majority
+fig4,a,LIBERO-Core-LT,re-sampling q=0.50,all,25.1,percent success,reported by Beyond the Majority
+fig4,a,LIBERO-Core-LT,re-sampling q=0.25,all,27.1,percent success,reported by Beyond the Majority
+fig4,a,LIBERO-Core-LT,APA formatting only,all,26.0,percent success,reported by Beyond the Majority
+fig4,a,LIBERO-Core-LT,APA augmentation only,all,26.9,percent success,reported by Beyond the Majority
+fig4,a,LIBERO-Core-LT,APA formatting+augmentation,all,36.1,percent success,reported by Beyond the Majority
+fig4,a,LIBERO-Core-LT,RBTAD,all,40.0,percent success,current single-seed evaluation
+fig5,a,LIBERO-Core-Full,BC baseline,all,43.0,percent success,50 rollouts per task
+fig5,a,LIBERO-Core-Full,TCAD-trained,all,50.0,percent success,50 rollouts per task
+fig5,b,LIBERO-Core-Full,BC baseline,1,60.0,percent success,50 rollouts
+fig5,b,LIBERO-Core-Full,BC baseline,2,80.0,percent success,50 rollouts
+fig5,b,LIBERO-Core-Full,BC baseline,3,60.0,percent success,50 rollouts
+fig5,b,LIBERO-Core-Full,BC baseline,4,30.0,percent success,50 rollouts
+fig5,b,LIBERO-Core-Full,BC baseline,5,34.0,percent success,50 rollouts
+fig5,b,LIBERO-Core-Full,BC baseline,6,40.0,percent success,50 rollouts
+fig5,b,LIBERO-Core-Full,BC baseline,7,56.0,percent success,50 rollouts
+fig5,b,LIBERO-Core-Full,BC baseline,8,28.0,percent success,50 rollouts
+fig5,b,LIBERO-Core-Full,BC baseline,9,38.0,percent success,50 rollouts
+fig5,b,LIBERO-Core-Full,BC baseline,10,2.0,percent success,50 rollouts
+fig5,b,LIBERO-Core-Full,TCAD-trained,1,68.0,percent success,50 rollouts
+fig5,b,LIBERO-Core-Full,TCAD-trained,2,78.0,percent success,50 rollouts
+fig5,b,LIBERO-Core-Full,TCAD-trained,3,56.0,percent success,50 rollouts
+fig5,b,LIBERO-Core-Full,TCAD-trained,4,58.0,percent success,50 rollouts
+fig5,b,LIBERO-Core-Full,TCAD-trained,5,82.0,percent success,50 rollouts
+fig5,b,LIBERO-Core-Full,TCAD-trained,6,30.0,percent success,50 rollouts
+fig5,b,LIBERO-Core-Full,TCAD-trained,7,40.0,percent success,50 rollouts
+fig5,b,LIBERO-Core-Full,TCAD-trained,8,36.0,percent success,50 rollouts
+fig5,b,LIBERO-Core-Full,TCAD-trained,9,50.0,percent success,50 rollouts
+fig5,b,LIBERO-Core-Full,TCAD-trained,10,4.0,percent success,50 rollouts
+figS,a,LIBERO-Core-LT,Tail-only rescue,all,34.0,percent success,internal diagnostic
+figS,a,LIBERO-Core-LT,RCTAD,all,35.0,percent success,internal diagnostic
+figS,a,LIBERO-Core-LT,Relation-anchor negatives,all,37.0,percent success,internal diagnostic
+figS,a,LIBERO-Core-LT,RBTAD,all,40.0,percent success,main end-to-end method
+figS,a,LIBERO-Core-LT,Selective projector merge,all,42.0,percent success,diagnostic not main method

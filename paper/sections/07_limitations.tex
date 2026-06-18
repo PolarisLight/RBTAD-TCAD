@@ -1,0 +1,11 @@
+\section{Limitations}
+
+This draft has four important limitations.
+
+First, the current RBTAD result on \liberocorelt{} is a single-seed evaluation. Beyond the Majority reports three-seed averages, so a final SOTA statement requires matching that protocol.
+
+Second, we do not have physical robot hardware for the Real-World-LT benchmark. Our next generalization test is therefore a simulated long-tail split, \liberospatiallt{}, constructed in the style of the original paper.
+
+Third, negative instruction construction is currently task-template based. This is simple and low-cost, but it can create false negatives if two tasks share the same early action. The current mild margin and sampling ratio reduce this risk, but do not eliminate it.
+
+Fourth, the method improves task-conditioned action boundaries but does not solve all rare relation tasks. In particular, the wine-bottle-to-rack task remains near zero in the current \liberocorelt{} run. Future work should combine task-conditioned discrimination with better state eligibility, object-relation grounding diagnostics, and multi-seed validation.
