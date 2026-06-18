@@ -1,0 +1,58 @@
+\documentclass[tikz,border=3pt]{standalone}
+
+\usepackage{times}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{xcolor}
+\usetikzlibrary{arrows.meta,positioning,fit,calc}
+
+\begin{document}
+\begin{minipage}{6.5in}
+\centering
+\begin{tikzpicture}[
+  font=\small,
+  box/.style={draw=#1!70!black, rounded corners=2pt, thick, fill=#1!8, inner sep=6pt, align=left},
+  arrow/.style={-{Latex[length=2mm]}, thick, draw=black!55},
+  tealbox/.style={draw=teal!70!black, rounded corners=2pt, fill=teal!8, inner sep=4pt, align=left},
+  orangebox/.style={draw=orange!80!black, rounded corners=2pt, fill=orange!10, inner sep=4pt, align=left}
+]
+  \node[box=gray, text width=0.26\linewidth] (bc) {
+    \textbf{1. Behavior cloning}\\[2pt]
+    Training sample: $(o_t,\ell_i,a_t)$\\[2pt]
+    \[
+      \mathcal{L}_{\mathrm{BC}}
+      =-\log p_\theta(a_t\mid o_t,\ell_i)
+    \]
+    learns expert action likelihood under the given task instruction.
+  };
+
+  \node[box=teal, text width=0.29\linewidth, right=0.55cm of bc] (pair) {
+    \textbf{2. Counterfactual instruction pair}\\[2pt]
+    Keep the same observation and action:
+    $(o_t,a_t)$\\[3pt]
+    \begin{tikzpicture}[font=\scriptsize]
+      \node[tealbox, text width=0.88\linewidth] (pos) {correct instruction $\ell_i$\\score $s^+=\log p_\theta(a_t\mid o_t,\ell_i)$};
+      \node[orangebox, text width=0.88\linewidth, below=3pt of pos] (neg) {wrong-target instruction $\ell_i^-$\\score $s^-=\log p_\theta(a_t\mid o_t,\ell_i^-)$};
+    \end{tikzpicture}\\[-2pt]
+    The negative changes the task target, not the image or expert action.
+  };
+
+  \node[box=orange, text width=0.30\linewidth, right=0.55cm of pair] (loss) {
+    \textbf{3. Training objective}\\[2pt]
+    \[
+    \begin{aligned}
+      \mathcal{L} &=
+      \mathbb{E}[w_i\mathcal{L}_{\mathrm{BC}}] \\
+      &\quad + \lambda [m-(s^+-s^-)]_+ .
+    \end{aligned}
+    \]
+    Rare tasks use a capped positive weight $w_i$.\\[2pt]
+    TCAD is applied only to eligible sampled pairs.\\[2pt]
+    \textbf{Inference:} unchanged VLA policy,
+    no generator, detector, or extra module.
+  };
+
+  \draw[arrow] (bc) -- (pair);
+  \draw[arrow] (pair) -- (loss);
+\end{tikzpicture}
+\end{minipage}
+\end{document}

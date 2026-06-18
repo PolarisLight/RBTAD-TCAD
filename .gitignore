@@ -19,6 +19,11 @@ paper/*.fls
 paper/*.log
 paper/*.out
 paper/*.synctex.gz
+paper/figures/rbtad/*.aux
+paper/figures/rbtad/*.fdb_latexmk
+paper/figures/rbtad/*.fls
+paper/figures/rbtad/*.log
+paper/figures/rbtad/*_standalone.pdf
 
 # Redundant manuscript PDFs
 paper/main.pdf
