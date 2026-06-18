@@ -14,6 +14,12 @@ Long-tailed embodied imitation datasets contain a few frequent head tasks and ma
 
 RBTAD targets a specific failure mode: a policy may assign similar likelihood to the same expert action under the correct instruction and under a plausible but wrong target instruction. The method regularizes this local task/action boundary while preserving the standard behavior-cloning pathway.
 
+## Method Overview
+
+RBTAD keeps the standard behavior-cloning pathway, constructs a plausible counterfactual instruction for selected training samples, and adds a mild ranking objective that encourages the correct instruction score to exceed the wrong-instruction score. Rare-aware positive weighting prevents tail demonstrations from being numerically drowned out, while inference remains identical to the baseline policy.
+
+![RBTAD method overview](paper/figures/rbtad/fig2_method_overview.png)
+
 ## Main Results
 
 The table below compares the current RBTAD result with the reported LIBERO-Core-LT baselines from *Beyond the Majority*. RBTAD is our current single-seed run, so it should be read as controlled preliminary evidence rather than a final SOTA claim.
