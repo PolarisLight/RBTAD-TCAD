@@ -89,7 +89,7 @@ class TrainConfig:
     tcad_margin: float = 0.2                                        # TCAD ranking margin
     tcad_tail_max_count: int = 0                                    # If >0, enable TCAD only for tasks at/below this count
     tcad_conf_gate: str = "none"                                    # none | batch_median
-    tcad_negative_mode: str = "object_swap"                         # object_swap | relation_anchor
+    tcad_negative_mode: str = "manifest"                         # object_swap | relation_anchor
     rare_bc_max_count: int = 0                                      # If >0, upweight BC loss for tasks at/below this count
     rare_bc_weight: float = 1.0                                     # Per-sample BC weight for rare tasks
     anchor_l2_lambda: float = 0.0                                   # L2-SP weight to keep short fine-tunes near the loaded checkpoint

@@ -6,11 +6,12 @@ format to OpenVLA, IterableDataset shim.
 """
 
 from dataclasses import dataclass
+import hashlib
 import re
 import random
 import os
 from pathlib import Path
-from typing import Any, Dict, Tuple, Type
+from typing import Any, Dict, Optional, Tuple, Type
 
 import numpy as np
 import torch
@@ -31,38 +32,90 @@ from prismatic.vla.datasets.rlds.utils.data_utils import NormalizationType
 IGNORE_INDEX = -100
 
 
-TCAD_OBJECTS = [
-    "black bowl", "cookie box", "plate", "ketchup", "basket", "alphabet soup",
-    "stove", "cabinet", "cream cheese", "wine bottle", "rack",
-]
-
-TCAD_TASK_COUNTS = {
-    "pick up the black bowl next to the plate and place it on the plate": 46,
-    "pick up the black bowl next to the cookie box and place it on the plate": 28,
-    "pick up the black bowl on the cookie box and place it on the plate": 19,
-    "pick up the ketchup and place it in the basket": 15,
-    "pick up the alphabet soup and place it in the basket": 11,
-    "push the plate to the front of the stove": 9,
-    "put the bowl on top of the cabinet": 8,
-    "put the cream cheese in the bowl": 7,
-    "put the wine bottle on top of the cabinet": 6,
-    "put the wine bottle on the rack": 5,
+TCAD_DATASET_MANIFESTS = {
+    "libero_core_lt": {
+        "task_counts": {
+            "pick up the black bowl next to the plate and place it on the plate": 46,
+            "pick up the black bowl next to the cookie box and place it on the plate": 28,
+            "pick up the black bowl on the cookie box and place it on the plate": 19,
+            "pick up the ketchup and place it in the basket": 15,
+            "pick up the alphabet soup and place it in the basket": 11,
+            "push the plate to the front of the stove": 9,
+            "put the bowl on top of the cabinet": 8,
+            "put the cream cheese in the bowl": 7,
+            "put the wine bottle on top of the cabinet": 6,
+            "put the wine bottle on the rack": 5,
+        },
+        "valid_negatives": {
+            "put the bowl on top of the cabinet": "put the wine bottle on top of the cabinet",
+            "put the cream cheese in the bowl": "pick up the ketchup and place it in the basket",
+            "put the wine bottle on top of the cabinet": "put the wine bottle on the rack",
+            "put the wine bottle on the rack": "put the wine bottle on top of the cabinet",
+        },
+    },
+    "libero_spatial_lt": {
+        "task_counts": {
+            "pick up the black bowl between the plate and the ramekin and place it on the plate": 44,
+            "pick up the black bowl from table center and place it on the plate": 28,
+            "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate": 19,
+            "pick up the black bowl next to the cookie box and place it on the plate": 15,
+            "pick up the black bowl next to the plate and place it on the plate": 11,
+            "pick up the black bowl next to the ramekin and place it on the plate": 9,
+            "pick up the black bowl on the cookie box and place it on the plate": 8,
+            "pick up the black bowl on the ramekin and place it on the plate": 7,
+            "pick up the black bowl on the stove and place it on the plate": 6,
+            "pick up the black bowl on the wooden cabinet and place it on the plate": 5,
+        },
+    },
 }
 
-TCAD_RELATION_NEGATIVES = {
-    "put the bowl on top of the cabinet": "put the bowl on the plate",
-    "put the cream cheese in the bowl": "put the cream cheese in the basket",
-    "put the wine bottle on top of the cabinet": "put the wine bottle on the rack",
-    "put the wine bottle on the rack": "put the wine bottle on top of the cabinet",
+TCAD_DATASET_ALIASES = {
+    "libero_core_full": "libero_core_lt",
+    "libero_core_apa": "libero_core_lt",
 }
 
 
-def _tcad_make_wrong_instruction(instruction: str):
+def _tcad_normalize_dataset_name(dataset_name: Any) -> str:
+    if isinstance(dataset_name, bytes):
+        dataset_name = dataset_name.decode("utf-8")
+    return TCAD_DATASET_ALIASES.get(str(dataset_name), str(dataset_name))
+
+
+def _tcad_manifest(dataset_name: Any) -> Optional[Dict[str, Dict[str, Any]]]:
+    return TCAD_DATASET_MANIFESTS.get(_tcad_normalize_dataset_name(dataset_name))
+
+
+def _tcad_task_count(instruction: str, dataset_name: Any) -> int:
+    manifest = _tcad_manifest(dataset_name)
+    if manifest is None:
+        return 10**9
+    return int(manifest["task_counts"].get(instruction.lower(), 10**9))
+
+
+def _tcad_manifest_negative(instruction: str, dataset_name: Any) -> Optional[str]:
+    manifest = _tcad_manifest(dataset_name)
+    if manifest is None:
+        return None
     instruction = instruction.lower()
-    if os.environ.get("TCAD_NEGATIVE_MODE", "object_swap") == "relation_anchor":
-        relation_negative = TCAD_RELATION_NEGATIVES.get(instruction)
-        if relation_negative is not None:
-            return relation_negative
+    explicit = manifest.get("valid_negatives", {}).get(instruction)
+    if explicit is not None and explicit in manifest["task_counts"]:
+        return explicit
+    candidates = [item for item in manifest["task_counts"] if item != instruction]
+    if not candidates:
+        return None
+    digest = hashlib.sha1(f"{_tcad_normalize_dataset_name(dataset_name)}::{instruction}".encode("utf-8")).hexdigest()
+    return candidates[int(digest, 16) % len(candidates)]
+
+
+def _tcad_make_wrong_instruction(instruction: str, dataset_name: Any = None):
+    instruction = instruction.lower()
+    mode = os.environ.get("TCAD_NEGATIVE_MODE", "manifest").strip().lower()
+    if mode in {"manifest", "dataset", "in_dataset", "relation_anchor"}:
+        manifest_negative = _tcad_manifest_negative(instruction, dataset_name)
+        if manifest_negative is not None:
+            return manifest_negative
+        if mode != "object_swap":
+            return None
 
     patterns = [
         r"^pick up the (.*?) next to the (.*?) and place it on the (.*?)$",
@@ -82,11 +135,6 @@ def _tcad_make_wrong_instruction(instruction: str):
         distractors = [g for g in groups[1:] if g and g != target]
         if distractors:
             return instruction.replace(target, distractors[0], 1)
-    for obj in TCAD_OBJECTS:
-        if obj in instruction:
-            for replacement in TCAD_OBJECTS:
-                if replacement != obj and replacement not in instruction:
-                    return instruction.replace(obj, replacement, 1)
     return None
 
 
@@ -153,7 +201,7 @@ class RLDSBatchTransform:
         tcad_ratio = float(os.environ.get("TCAD_RATIO", "0"))
         rare_bc_max_count = int(os.environ.get("RARE_BC_MAX_COUNT", "0"))
         rare_bc_weight = float(os.environ.get("RARE_BC_WEIGHT", "1.0"))
-        task_count = TCAD_TASK_COUNTS.get(lang, 10**9)
+        task_count = _tcad_task_count(lang, dataset_name)
         sample_weight = rare_bc_weight if rare_bc_max_count > 0 and task_count <= rare_bc_max_count else 1.0
         target_task_weight = float(os.environ.get("TARGET_TASK_WEIGHT", "1.0"))
         target_task_instructions = [
@@ -166,12 +214,12 @@ class RLDSBatchTransform:
         tcad_active = False
         negative_input_ids, negative_labels = input_ids, labels
         if tcad_ratio > 0 and random.random() < tcad_ratio:
-            wrong_lang = _tcad_make_wrong_instruction(lang)
+            wrong_lang = _tcad_make_wrong_instruction(lang, dataset_name)
             # Main experiment eligibility: use an action-derived gripper phase signal.
             # On LIBERO core-lt TFDS, action[-1] is binary {-1, +1}; positive starts after an initial approach phase.
             gripper_positive = bool(float(np.asarray(action)[-1]) > 0)
             tail_max_count = int(os.environ.get("TCAD_TAIL_MAX_COUNT", "0"))
-            tail_allowed = tail_max_count <= 0 or TCAD_TASK_COUNTS.get(lang, 10**9) <= tail_max_count
+            tail_allowed = tail_max_count <= 0 or task_count <= tail_max_count
             if wrong_lang is not None and gripper_positive and tail_allowed:
                 neg_conversation = [
                     {"from": "human", "value": f"What action should the robot take to {wrong_lang}?"},
@@ -208,6 +256,7 @@ class RLDSBatchTransform:
             input_ids=input_ids,
             labels=labels,
             sample_weight=torch.tensor(sample_weight, dtype=torch.float32),
+            task_count=torch.tensor(task_count, dtype=torch.int64),
             negative_input_ids=negative_input_ids,
             negative_labels=negative_labels,
             tcad_active=torch.tensor(tcad_active, dtype=torch.bool),

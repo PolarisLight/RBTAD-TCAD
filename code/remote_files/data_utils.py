@@ -123,6 +123,11 @@ class PaddedCollatorForActionPrediction:
             if "sample_weight" in instances[0]
             else None
         )
+        task_counts = (
+            torch.stack([instance["task_count"] for instance in instances])
+            if "task_count" in instances[0]
+            else None
+        )
 
         # For now, we only support Tokenizers with `padding_side = "right"` during training
         #   => Handle padding via RNN Utils => `pad_sequence`
@@ -172,4 +177,6 @@ class PaddedCollatorForActionPrediction:
             output["dataset_names"] = dataset_names
         if sample_weights is not None:
             output["sample_weights"] = sample_weights
+        if task_counts is not None:
+            output["task_counts"] = task_counts
         return output

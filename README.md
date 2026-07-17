@@ -45,7 +45,7 @@ We also ran a controlled LIBERO-Core-Full counterpart experiment using the same 
 | --- | --- | ---: |
 | LIBERO-Core-Full | BC baseline | 43.0% |
 | LIBERO-Core-Full | TCAD-trained | **50.0%** |
-| LIBERO-Spatial-LT | RBTAD | In progress |
+| LIBERO-Spatial-LT | RBTAD | Screening running |
 
 The task-level analysis below shows that the Core-Full gain is not a uniform lift across all tasks. Improvements concentrate in lower-baseline tasks and in tasks 4-10, which supports the view that TCAD helps sharpen difficult task-conditioned action boundaries.
 

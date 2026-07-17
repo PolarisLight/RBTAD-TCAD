@@ -448,7 +448,10 @@ class TrainingStrategy(ABC):
                 if tcad_debug_file and overwatch.is_rank_zero():
                     with open(tcad_debug_file, "a") as f:
                         if metrics.global_step == 0:
-                            f.write("step,candidate_count,active_count,batch_size,tcad_loss,anchor_l2_loss\n")
+                            f.write(
+                                "step,candidate_count,active_count,batch_size,tail_hit_count,"
+                                "weighted_count,mean_sample_weight,tcad_loss,anchor_l2_loss\n"
+                            )
                         value = "nan" if tcad_loss is None else f"{float(tcad_loss.detach().cpu()):.6f}"
                         anchor_value = (
                             "nan"
@@ -456,9 +459,24 @@ class TrainingStrategy(ABC):
                             else f"{float(anchor_l2_loss.detach().cpu()):.6f}"
                         )
                         batch_size = int(tcad_active.numel()) if tcad_active is not None else 0
+                        task_counts = batch.get("task_counts", None)
+                        tail_limit = int(os.environ.get("TCAD_TAIL_MAX_COUNT", "0") or "0")
+                        if task_counts is not None and tail_limit > 0:
+                            tail_hit_count = int((task_counts.to(output.logits.device) <= tail_limit).sum().item())
+                        else:
+                            tail_hit_count = 0
+                        sample_weights = batch.get("sample_weights", None)
+                        if sample_weights is not None:
+                            weights = sample_weights.float()
+                            weighted_count = int((weights != 1.0).sum().item())
+                            mean_sample_weight = float(weights.mean().item())
+                        else:
+                            weighted_count = 0
+                            mean_sample_weight = 1.0
                         f.write(
                             f"{metrics.global_step},{tcad_candidate_count},{tcad_active_count},"
-                            f"{batch_size},{value},{anchor_value}\n"
+                            f"{batch_size},{tail_hit_count},{weighted_count},{mean_sample_weight:.6f},"
+                            f"{value},{anchor_value}\n"
                         )
                 loss.backward()
 
