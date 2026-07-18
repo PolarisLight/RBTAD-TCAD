@@ -13,13 +13,17 @@ The TCAD-trained \liberocorefull{} result uses
 
 The matched \liberospatiallt{} baseline result uses
 \path{results/spatial_lt_confirm30/baseline_libero_spatial_lt_s1000_seed7_b20/step1000/baseline_libero_spatial_lt_s1000_seed7_b20_libero_spatial_30trials_egl_20260718_163015}.
-The RSDF vision+LLM result uses
+The seed 7 RSDF vision+LLM result uses
 \path{results/spatial_lt_confirm30/rsdf_visionllm_barc100_a0p5/step100/rsdf_visionllm_barc100_a0p5_libero_spatial_30trials_egl_20260718_144932}.
+The seed 13 confirmation uses
+\path{results/spatial_lt_multiseed_confirm30/rsdf_visionllm_barc100_seed13_a0p5_20260718_185539/step100/rsdf_visionllm_barc100_seed13_a0p5_20260718_185539_libero_spatial_30trials_egl_20260718_214241}
+and
+\path{results/spatial_lt_multiseed_confirm30/baseline_libero_spatial_lt_s1000_seed13_b20_20260718_185539/step1000/baseline_libero_spatial_lt_s1000_seed13_b20_20260718_185539_libero_spatial_30trials_egl_20260718_231752}.
 
 \paragraph{Experiments to finish before a stronger arXiv revision.}
 \begin{itemize}[leftmargin=*]
   \item Re-run or verify the \liberocorelt{} BC baseline under the exact same local evaluation pipeline as RBTAD.
   \item Add at least two more seeds for RBTAD on \liberocorelt{}.
   \item Add at least one more simulated long-tail split beyond \liberospatiallt{} to test whether RSDF generalizes beyond relation-only Spatial tasks.
-  \item Add multi-seed confirmation for \liberospatiallt{} baseline and RSDF, especially because tasks 5/7/9 remain unsolved.
+  \item Revise the \liberospatiallt{} method to close the seed 13 reliability gap; the current two-seed evidence is positive but too small on seed 13.
 \end{itemize}

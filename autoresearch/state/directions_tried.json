@@ -1,14 +1,61 @@
 {
   "tried": [
-    {"name":"full RBTAD", "result":"0.20 on 10-trial Spatial-LT; rejected due head/mid collapse"},
-    {"name":"TCAD-only", "result":"0.18 on 10-trial Spatial-LT; rejected as standalone"},
-    {"name":"rare-only/tail-anchor", "result":"0.09-0.24 range; rejected due collateral drift and unsolved extreme tails"},
-    {"name":"staged-tail 800+200 and 900+100", "result":"0.24 and 0.26 on 10-trial; useful but not stable"},
-    {"name":"task-balanced replay", "result":"0.11 full-balanced and 0.14 tempered/original-stat; rejected"},
-    {"name":"BARC/full soup", "result":"best 10-trial 0.27; weak improvement"},
-    {"name":"RSDF projector-only", "result":"0.13; rejected"},
-    {"name":"RSDF LLM-only", "result":"0.23; rejected vs baseline"},
-    {"name":"RSDF vision+LLM", "result":"0.25 on matched 30-trial vs baseline 0.19; current best"}
+    {
+      "name": "full RBTAD",
+      "result": "0.20 on 10-trial Spatial-LT; rejected due head/mid collapse"
+    },
+    {
+      "name": "TCAD-only",
+      "result": "0.18 on 10-trial Spatial-LT; rejected as standalone"
+    },
+    {
+      "name": "rare-only/tail-anchor",
+      "result": "0.09-0.24 range; rejected due collateral drift and unsolved extreme tails"
+    },
+    {
+      "name": "staged-tail 800+200 and 900+100",
+      "result": "0.24 and 0.26 on 10-trial; useful but not stable"
+    },
+    {
+      "name": "task-balanced replay",
+      "result": "0.11 full-balanced and 0.14 tempered/original-stat; rejected"
+    },
+    {
+      "name": "BARC/full soup",
+      "result": "best 10-trial 0.27; weak improvement"
+    },
+    {
+      "name": "RSDF projector-only",
+      "result": "0.13; rejected"
+    },
+    {
+      "name": "RSDF LLM-only",
+      "result": "0.23; rejected vs baseline"
+    },
+    {
+      "name": "RSDF vision+LLM",
+      "result": "seed7 matched 30-trial 0.25 vs baseline 0.19, but seed13 0.18 vs baseline 0.17; useful diagnostic but not reliable final method"
+    },
+    {
+      "name": "SPRC full-parameter L2-SP correction",
+      "result": "seed7 10-trial 0.17 and seed13 0.13; rejected because weight protection alone does not fix harmful correction samples"
+    },
+    {
+      "name": "CGRBC confusion-gated rare BC",
+      "result": "seed7 10-trial 0.26 but seed13 0.10; rejected as unstable despite active TCAD/tail gate"
+    },
+    {
+      "name": "CGRBC 5-step corrective pulse",
+      "result": "seed7 0.19 and seed13 0.13; rejected because conservative correction preserves little and does not lift"
+    },
+    {
+      "name": "RLCT LLM-only relation-localized correction",
+      "result": "seed7 0.17 and seed13 0.18; rejected because freezing non-LLM parameters is too restrictive"
+    },
+    {
+      "name": "Behavior-Preserving Corrective Distillation",
+      "result": "next structural direction; not yet run"
+    }
   ],
-  "next_structural_direction": "Relation-family-aware protection or additional LT simulation validation, not another blind hyperparameter sweep."
+  "next_structural_direction": "Preserve baseline action distribution during relation correction; do not sweep alpha or add inference modules."
 }

@@ -33,19 +33,21 @@ On \liberocorelt{}, RBTAD reaches 40.0\%. Table~\ref{tab:main} places this resul
 
 \begin{table}[t]
   \centering
-  \caption{Controlled counterpart results outside the main \liberocorelt{} benchmark. \liberocorefull{} uses 50 rollouts per task. \liberospatiallt{} uses matched 30-rollout-per-task evaluations under the same seed and checkpoint budget.}
+  \caption{Controlled counterpart results outside the main \liberocorelt{} benchmark. \liberocorefull{} uses 50 rollouts per task. \liberospatiallt{} uses matched 30-rollout-per-task evaluations under the same checkpoint budget; two seeds are shown because the second seed weakens the RSDF claim.}
   \label{tab:controlled_full}
-  \begin{tabular}{llc}
+  \begin{tabular}{lllc}
     \toprule
-    Dataset & Method & Success rate \\
+    Dataset & Seed & Method & Success rate \\
     \midrule
     \multirow{2}{*}{\liberocorefull{}}
-      & BC baseline & 43.0\% \\
-      & TCAD-trained & \textbf{50.0\%} \\
+      & 7 & BC baseline & 43.0\% \\
+      & 7 & TCAD-trained & \textbf{50.0\%} \\
     \midrule
-    \multirow{2}{*}{\liberospatiallt{}}
-      & BC baseline & 19.0\% \\
-      & RSDF vision+LLM & \textbf{25.0\%} \\
+    \multirow{4}{*}{\liberospatiallt{}}
+      & 7 & BC baseline & 19.0\% \\
+      & 7 & RSDF vision+LLM & \textbf{25.0\%} \\
+      & 13 & BC baseline & 17.0\% \\
+      & 13 & RSDF vision+LLM & 18.0\% \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -58,7 +60,7 @@ On \liberocorelt{}, RBTAD reaches 40.0\%. Table~\ref{tab:main} places this resul
 \end{figure}
 
 
-The \liberospatiallt{} result in Table~\ref{tab:controlled_full} is intentionally reported as a screening result rather than folded into the main \liberocorelt{} claim. Full-run RBTAD and replay-style balancing were brittle on this split because all tasks share the black bowl and the final plate, so the useful signal is concentrated in the source spatial relation. We therefore tested Relation-Localized Delta Fusion (RSDF): first obtain a short baseline-anchored relation-correction checkpoint, then fuse only the \texttt{vision\_backbone} and \texttt{llm\_backbone} deltas into the baseline while keeping the projector fixed. RSDF adds no inference-time module and does not alter the model architecture. Under matched 30-rollout-per-task evaluation, the baseline reaches 19.0\%, while RSDF reaches 25.0\%, a 6-point absolute gain.
+The \liberospatiallt{} result in Table~\ref{tab:controlled_full} is intentionally reported as a screening result rather than folded into the main \liberocorelt{} claim. Full-run RBTAD and replay-style balancing were brittle on this split because all tasks share the black bowl and the final plate, so the useful signal is concentrated in the source spatial relation. We therefore tested Relation-Localized Delta Fusion (RSDF): first obtain a short baseline-anchored relation-correction checkpoint, then fuse only the \texttt{vision\_backbone} and \texttt{llm\_backbone} deltas into the baseline while keeping the projector fixed. RSDF adds no inference-time module and does not alter the model architecture. Under matched 30-rollout-per-task evaluation, seed 7 shows a 6-point absolute gain, from 19.0\% to 25.0\%. However, seed 13 gives only a 1-point gain, from 17.0\% to 18.0\%. We therefore treat RSDF as a useful diagnostic direction rather than a reliable final method.
 
 The \liberocorefull{} controlled comparison in Table~\ref{tab:controlled_full} and Figure~\ref{fig:corefull_control} gives a cleaner within-pipeline signal. Using the same seed and evaluation budget, the baseline reaches 43.0\%, while the TCAD-trained policy reaches 50.0\%. This suggests that the action-discrimination objective is not only exploiting the exact long-tail split; it can also help difficult task-conditioned action boundaries in the full counterpart dataset.
 

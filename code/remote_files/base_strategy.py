@@ -395,7 +395,13 @@ class TrainingStrategy(ABC):
                         float(os.environ.get("RARE_BC_WEIGHT", "1.0")) != 1.0
                         or float(os.environ.get("TARGET_TASK_WEIGHT", "1.0")) != 1.0
                     )
-                    if use_sample_weights and "sample_weights" in batch:
+                    confusion_gated_rare = os.environ.get("RARE_BC_CONFUSION_ONLY", "0").lower() in {
+                        "1",
+                        "true",
+                        "yes",
+                    }
+                    effective_sample_weights = batch.get("sample_weights", None)
+                    if use_sample_weights and not confusion_gated_rare and "sample_weights" in batch:
                         loss = self._weighted_action_loss(
                             output.logits,
                             batch["labels"],
@@ -403,6 +409,8 @@ class TrainingStrategy(ABC):
                             action_tokenizer,
                         )
                     tcad_loss = None
+                    tcad_loss_term = None
+                    corrective_active = None
                     tcad_active = batch.get("tcad_active", None)
                     tcad_candidate_count = int(tcad_active.sum().item()) if tcad_active is not None else 0
                     tcad_active_count = tcad_candidate_count
@@ -433,11 +441,30 @@ class TrainingStrategy(ABC):
                             )
                             if active.any():
                                 margin = float(os.environ.get("TCAD_MARGIN", "0.2"))
-                                tcad_loss = torch.relu(margin - (pos_score - neg_score))[active].mean()
-                                loss = loss + tcad_weight * tcad_loss
+                                margin_loss = torch.relu(margin - (pos_score - neg_score))
+                                corrective_active = active & (margin_loss.detach() > 0)
+                                tcad_loss = margin_loss[active].mean()
+                                tcad_loss_term = tcad_weight * tcad_loss
+                                loss = loss + tcad_loss_term
                             else:
                                 tcad_loss = torch.zeros((), device=output.logits.device)
                                 loss = loss + 0.0 * neg_output.logits[:, :1, :1].sum()
+                    if confusion_gated_rare and use_sample_weights and "sample_weights" in batch:
+                        original_weights = batch["sample_weights"].to(output.logits.device).float()
+                        gated_weights = torch.ones_like(original_weights)
+                        if corrective_active is not None:
+                            tail_mask = original_weights > 1.0
+                            gated_weights = torch.where(corrective_active & tail_mask, original_weights, gated_weights)
+                        effective_sample_weights = gated_weights
+                        if bool((gated_weights != 1.0).any().item()):
+                            loss = self._weighted_action_loss(
+                                output.logits,
+                                batch["labels"],
+                                gated_weights,
+                                action_tokenizer,
+                            )
+                            if tcad_loss_term is not None:
+                                loss = loss + tcad_loss_term
                     anchor_l2_loss = self._anchor_l2_loss()
                     if anchor_l2_loss is not None:
                         loss = loss + anchor_l2_loss
@@ -465,7 +492,7 @@ class TrainingStrategy(ABC):
                             tail_hit_count = int((task_counts.to(output.logits.device) <= tail_limit).sum().item())
                         else:
                             tail_hit_count = 0
-                        sample_weights = batch.get("sample_weights", None)
+                        sample_weights = effective_sample_weights
                         if sample_weights is not None:
                             weights = sample_weights.float()
                             weighted_count = int((weights != 1.0).sum().item())
