@@ -6,3 +6,4 @@
 {"ts":"2026-07-18T14:49:00+08:00","type":"positive","finding":"RSDF vision+LLM alpha=0.5 reaches 0.31 in 10-trial screening, suggesting relation correction is useful when projector drift is avoided."}
 {"ts":"2026-07-18T18:35:00+08:00","type":"confirmation","finding":"Matched 30-trial confirmation: baseline 0.19 vs RSDF vision+LLM 0.25, an absolute +0.06 gain under the same Spatial-LT protocol."}
 {"ts":"2026-07-18T19:10:00+08:00","type":"manuscript","finding":"Updated and compiled the manuscript with Spatial-LT RSDF matched 30-trial results; tracked PDF now contains baseline 19.0% and RSDF 25.0%."}
+{"ts":"2026-07-18T18:56:00+08:00","type":"experiment_launch","finding":"Launched seed13 RSDF matched confirmation watcher on server23. It waits until physical GPUs 2/3 are both below 2GB and low-utilization, then runs baseline-1000, BARC-p100, RSDF vision+LLM, and matched 30-trial baseline/RSDF evaluation."}
