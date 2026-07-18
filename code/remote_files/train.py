@@ -90,6 +90,7 @@ class TrainConfig:
     tcad_tail_max_count: int = 0                                    # If >0, enable TCAD only for tasks at/below this count
     tcad_conf_gate: str = "none"                                    # none | batch_median
     tcad_negative_mode: str = "manifest"                         # object_swap | relation_anchor
+    tcad_detach_positive: bool = False                              # If true, TCAD gradients only suppress the negative-instruction branch
     rare_bc_max_count: int = 0                                      # If >0, upweight BC loss for tasks at/below this count
     rare_bc_weight: float = 1.0                                     # Per-sample BC weight for rare tasks
     anchor_l2_lambda: float = 0.0                                   # L2-SP weight to keep short fine-tunes near the loaded checkpoint
@@ -281,6 +282,7 @@ def train(cfg: TrainConfig) -> None:
     os.environ["TCAD_TAIL_MAX_COUNT"] = str(cfg.tcad_tail_max_count if cfg.tcad_lambda > 0 else 0)
     os.environ["TCAD_CONF_GATE"] = cfg.tcad_conf_gate
     os.environ["TCAD_NEGATIVE_MODE"] = cfg.tcad_negative_mode
+    os.environ["TCAD_DETACH_POSITIVE"] = "1" if cfg.tcad_detach_positive else "0"
     os.environ["RARE_BC_MAX_COUNT"] = str(cfg.rare_bc_max_count if cfg.rare_bc_weight != 1.0 else 0)
     os.environ["RARE_BC_WEIGHT"] = str(cfg.rare_bc_weight)
     os.environ["ANCHOR_L2_LAMBDA"] = str(cfg.anchor_l2_lambda)

@@ -411,6 +411,7 @@ class TrainingStrategy(ABC):
                     tcad_loss = None
                     tcad_loss_term = None
                     corrective_active = None
+                    detach_positive_tcad = os.environ.get("TCAD_DETACH_POSITIVE", "0").lower() in {"1", "true", "yes"}
                     tcad_active = batch.get("tcad_active", None)
                     tcad_candidate_count = int(tcad_active.sum().item()) if tcad_active is not None else 0
                     tcad_active_count = tcad_candidate_count
@@ -441,7 +442,8 @@ class TrainingStrategy(ABC):
                             )
                             if active.any():
                                 margin = float(os.environ.get("TCAD_MARGIN", "0.2"))
-                                margin_loss = torch.relu(margin - (pos_score - neg_score))
+                                tcad_pos_score = pos_score.detach() if detach_positive_tcad else pos_score
+                                margin_loss = torch.relu(margin - (tcad_pos_score - neg_score))
                                 corrective_active = active & (margin_loss.detach() > 0)
                                 tcad_loss = margin_loss[active].mean()
                                 tcad_loss_term = tcad_weight * tcad_loss
@@ -477,7 +479,7 @@ class TrainingStrategy(ABC):
                         if metrics.global_step == 0:
                             f.write(
                                 "step,candidate_count,active_count,batch_size,tail_hit_count,"
-                                "weighted_count,mean_sample_weight,tcad_loss,anchor_l2_loss\n"
+                                "weighted_count,mean_sample_weight,tcad_loss,anchor_l2_loss,detach_positive\n"
                             )
                         value = "nan" if tcad_loss is None else f"{float(tcad_loss.detach().cpu()):.6f}"
                         anchor_value = (
@@ -503,7 +505,7 @@ class TrainingStrategy(ABC):
                         f.write(
                             f"{metrics.global_step},{tcad_candidate_count},{tcad_active_count},"
                             f"{batch_size},{tail_hit_count},{weighted_count},{mean_sample_weight:.6f},"
-                            f"{value},{anchor_value}\n"
+                            f"{value},{anchor_value},{int(detach_positive_tcad)}\n"
                         )
                 loss.backward()
 
