@@ -5,3 +5,4 @@
 {"ts":"2026-07-18T12:15:00+08:00","type":"negative","finding":"Baseline-anchored TCAD-only correction reaches only 0.18 on 10-trial Spatial-LT; standalone TCAD is not sufficient."}
 {"ts":"2026-07-18T14:49:00+08:00","type":"positive","finding":"RSDF vision+LLM alpha=0.5 reaches 0.31 in 10-trial screening, suggesting relation correction is useful when projector drift is avoided."}
 {"ts":"2026-07-18T18:35:00+08:00","type":"confirmation","finding":"Matched 30-trial confirmation: baseline 0.19 vs RSDF vision+LLM 0.25, an absolute +0.06 gain under the same Spatial-LT protocol."}
+{"ts":"2026-07-18T19:10:00+08:00","type":"manuscript","finding":"Updated and compiled the manuscript with Spatial-LT RSDF matched 30-trial results; tracked PDF now contains baseline 19.0% and RSDF 25.0%."}

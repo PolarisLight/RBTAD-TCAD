@@ -1,21 +1,21 @@
 {
-  "iteration": 9,
-  "status": "rsdf_confirmed_on_spatial_lt_screening",
-  "stale_count": 0,
-  "total_findings": 12,
-  "last_update": "2026-07-18T18:35:00+08:00",
-  "remote": "cyh@59.77.7.23:/mnt/data/cyh/VLA-long-tail",
-  "gpu_policy": "use at most physical GPUs 2 and 3; never interrupt other users",
-  "current_best": {
-    "method": "RSDF vision+LLM alpha=0.5 from baseline-1000 and BARC-p100",
-    "baseline_30trial": 0.19,
-    "method_30trial": 0.25,
-    "absolute_gain": 0.06
-  },
-  "remaining_risk": [
-    "single seed/checkpoint branch",
-    "additional LT simulation dataset still pending",
-    "extreme tail tasks 5/7/9 remain unsolved",
-    "task 6 drops relative to baseline"
-  ]
+    "iteration":  9,
+    "status":  "manuscript_updated_and_pushed",
+    "stale_count":  0,
+    "total_findings":  12,
+    "last_update":  "2026-07-18T19:10:00+08:00",
+    "remote":  "cyh@59.77.7.23:/mnt/data/cyh/VLA-long-tail",
+    "gpu_policy":  "use at most physical GPUs 2 and 3; never interrupt other users",
+    "current_best":  {
+                         "method":  "RSDF vision+LLM alpha=0.5 from baseline-1000 and BARC-p100",
+                         "baseline_30trial":  0.19,
+                         "method_30trial":  0.25,
+                         "absolute_gain":  0.06
+                     },
+    "remaining_risk":  [
+                           "single seed/checkpoint branch",
+                           "additional LT simulation dataset still pending",
+                           "extreme tail tasks 5/7/9 remain unsolved",
+                           "task 6 drops relative to baseline"
+                       ]
 }
