@@ -11,10 +11,15 @@ The controlled \liberocorefull{} baseline result uses evaluation directory
 The TCAD-trained \liberocorefull{} result uses
 \path{results/core_full_protocol/rbtad_libero_core_full_alltcad_protocol_seed7_b20/101071/rbtad_libero_core_full_50trials_egl_20260617_003121}.
 
+The matched \liberospatiallt{} baseline result uses
+\path{results/spatial_lt_confirm30/baseline_libero_spatial_lt_s1000_seed7_b20/step1000/baseline_libero_spatial_lt_s1000_seed7_b20_libero_spatial_30trials_egl_20260718_163015}.
+The RSDF vision+LLM result uses
+\path{results/spatial_lt_confirm30/rsdf_visionllm_barc100_a0p5/step100/rsdf_visionllm_barc100_a0p5_libero_spatial_30trials_egl_20260718_144932}.
+
 \paragraph{Experiments to finish before a stronger arXiv revision.}
 \begin{itemize}[leftmargin=*]
   \item Re-run or verify the \liberocorelt{} BC baseline under the exact same local evaluation pipeline as RBTAD.
   \item Add at least two more seeds for RBTAD on \liberocorelt{}.
-  \item Complete \liberospatiallt{} data construction, then train and evaluate BC baseline and RBTAD under the same protocol.
-  \item Replace the \liberospatiallt{} in-progress row before public submission if the draft is intended as a polished arXiv version rather than a lab preprint.
+  \item Add at least one more simulated long-tail split beyond \liberospatiallt{} to test whether RSDF generalizes beyond relation-only Spatial tasks.
+  \item Add multi-seed confirmation for \liberospatiallt{} baseline and RSDF, especially because tasks 5/7/9 remain unsolved.
 \end{itemize}

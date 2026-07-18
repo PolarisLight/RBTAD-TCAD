@@ -1,11 +1,11 @@
-﻿\section{Experiments}
+\section{Experiments}
 \label{sec:experiments}
 
 \subsection{Benchmarks and Evaluation}
 
-We evaluate on the LIBERO-based long-tail setting introduced by Beyond the Majority~\cite{zhu2026beyond}. The main simulated benchmark is \liberocorelt{}, a 10-task long-tailed split with three head tasks and seven tail tasks. We also report a controlled \liberocorefull{} counterpart experiment using the same training and evaluation pipeline. Finally, we are constructing \liberospatiallt{}, a new simulated long-tail split from LIBERO-Spatial, to test whether the method generalizes beyond the Core task set. This last experiment is not yet included in the main numerical claims.
+We evaluate on the LIBERO-based long-tail setting introduced by Beyond the Majority~\cite{zhu2026beyond}. The main simulated benchmark is \liberocorelt{}, a 10-task long-tailed split with three head tasks and seven tail tasks. We also report a controlled \liberocorefull{} counterpart experiment using the same training and evaluation pipeline. Finally, we report \liberospatiallt{}, a simulated long-tail split constructed from LIBERO-Spatial to test whether the same problem appears when tasks share the same object and goal but differ in source spatial relation.
 
-Unless otherwise specified, our evaluations use 30 rollouts per task for \liberocorelt{} and 50 rollouts per task for the \liberocorefull{} controlled comparison. We report success rate averaged across tasks. Our current results are single-seed runs; multi-seed evaluation is required before the strongest statistical claims.
+Unless otherwise specified, our evaluations use 30 rollouts per task for \liberocorelt{} and \liberospatiallt{}, and 50 rollouts per task for the \liberocorefull{} controlled comparison. We report success rate averaged across tasks. Our current results are single-seed runs; multi-seed evaluation is required before the strongest statistical claims.
 
 \subsection{Main Results}
 
@@ -33,7 +33,7 @@ On \liberocorelt{}, RBTAD reaches 40.0\%. Table~\ref{tab:main} places this resul
 
 \begin{table}[t]
   \centering
-  \caption{Controlled counterpart results outside the main \liberocorelt{} benchmark. These runs use our local pipeline with the same seed and 50 rollouts per task.}
+  \caption{Controlled counterpart results outside the main \liberocorelt{} benchmark. \liberocorefull{} uses 50 rollouts per task. \liberospatiallt{} uses matched 30-rollout-per-task evaluations under the same seed and checkpoint budget.}
   \label{tab:controlled_full}
   \begin{tabular}{llc}
     \toprule
@@ -43,7 +43,9 @@ On \liberocorelt{}, RBTAD reaches 40.0\%. Table~\ref{tab:main} places this resul
       & BC baseline & 43.0\% \\
       & TCAD-trained & \textbf{50.0\%} \\
     \midrule
-    \liberospatiallt{} & RBTAD & In progress \\
+    \multirow{2}{*}{\liberospatiallt{}}
+      & BC baseline & 19.0\% \\
+      & RSDF vision+LLM & \textbf{25.0\%} \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -54,6 +56,9 @@ On \liberocorelt{}, RBTAD reaches 40.0\%. Table~\ref{tab:main} places this resul
   \caption{Task-level analysis on \liberocorefull{}. Rather than duplicating the per-task table, this plot relates each task's baseline success rate to the TCAD gain. Improvements concentrate in the low-baseline regime and in tasks 4--10, while several already strong tasks are flat or slightly worse.}
   \label{fig:corefull_control}
 \end{figure}
+
+
+The \liberospatiallt{} result in Table~\ref{tab:controlled_full} is intentionally reported as a screening result rather than folded into the main \liberocorelt{} claim. Full-run RBTAD and replay-style balancing were brittle on this split because all tasks share the black bowl and the final plate, so the useful signal is concentrated in the source spatial relation. We therefore tested Relation-Localized Delta Fusion (RSDF): first obtain a short baseline-anchored relation-correction checkpoint, then fuse only the \texttt{vision\_backbone} and \texttt{llm\_backbone} deltas into the baseline while keeping the projector fixed. RSDF adds no inference-time module and does not alter the model architecture. Under matched 30-rollout-per-task evaluation, the baseline reaches 19.0\%, while RSDF reaches 25.0\%, a 6-point absolute gain.
 
 The \liberocorefull{} controlled comparison in Table~\ref{tab:controlled_full} and Figure~\ref{fig:corefull_control} gives a cleaner within-pipeline signal. Using the same seed and evaluation budget, the baseline reaches 43.0\%, while the TCAD-trained policy reaches 50.0\%. This suggests that the action-discrimination objective is not only exploiting the exact long-tail split; it can also help difficult task-conditioned action boundaries in the full counterpart dataset.
 
@@ -78,6 +83,3 @@ The per-task results show a mixed but informative pattern. On \liberocorelt{}, R
 \subsection{Implementation Details}
 
 We fine-tune miniVLA-style checkpoints using the same model architecture and inference pathway as the baseline. RBTAD uses two GPUs during training and evaluation in our screening runs, avoiding four-GPU saturation. The \liberocorelt{} RBTAD configuration uses $\lambda=0.1$, $\rho=0.5$, margin $m=0.2$, rare threshold $\tau=9$, and rare BC weight $w_{\mathrm{rare}}=3.0$. The \liberocorefull{} TCAD run disables rare weighting and applies the TCAD signal more broadly, because the split is not long-tailed.
-
-
-
