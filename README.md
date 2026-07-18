@@ -1,4 +1,4 @@
-# RBTAD-TCAD
+﻿# RBTAD-TCAD
 
 **Rare-Balanced Task-Conditioned Action Discrimination (RBTAD)** is a preliminary, training-only method for long-tailed embodied imitation learning. It keeps the baseline VLA architecture and inference path unchanged, but adds a task-conditioned action discrimination objective during fine-tuning.
 
@@ -45,11 +45,25 @@ We also ran a controlled LIBERO-Core-Full counterpart experiment using the same 
 | --- | --- | ---: |
 | LIBERO-Core-Full | BC baseline | 43.0% |
 | LIBERO-Core-Full | TCAD-trained | **50.0%** |
-| LIBERO-Spatial-LT | RBTAD | Screening running |
+| LIBERO-Spatial-LT | BC baseline, matched 30 trials/task | 19.0% |
+| LIBERO-Spatial-LT | RSDF vision+LLM, matched 30 trials/task | **25.0%** |
 
 The task-level analysis below shows that the Core-Full gain is not a uniform lift across all tasks. Improvements concentrate in lower-baseline tasks and in tasks 4-10, which supports the view that TCAD helps sharpen difficult task-conditioned action boundaries.
 
 ![Task-level analysis on LIBERO-Core-Full](paper/figures/rbtad/fig3_corefull_delta_analysis.png)
+
+## Spatial-LT RSDF Screening
+
+LIBERO-Spatial-LT is a second simulated long-tail split built from LIBERO-Spatial tasks. Unlike LIBERO-Core-LT, these tasks share the same manipulated object and final goal but differ mainly in the source spatial relation. This makes naive replay and full-run reweighting brittle: the model must correct relation grounding without damaging the embodied policy learned by the baseline.
+
+The current best Spatial-LT method is **Relation-Localized Delta Fusion (RSDF)**. RSDF first obtains a short baseline-anchored relation-correction checkpoint, then fuses only the `vision_backbone` and `llm_backbone` deltas into the baseline while keeping the projector fixed. It adds no inference-time module and does not change the policy architecture.
+
+| Dataset | Method | Trials/task | Success rate |
+| --- | --- | ---: | ---: |
+| LIBERO-Spatial-LT | BC baseline | 30 | 19.0% |
+| LIBERO-Spatial-LT | RSDF vision+LLM | 30 | **25.0%** |
+
+Task-level Spatial-LT result: baseline `[.50, .00, .20, .47, .17, .00, .40, .00, .17, .00]`; RSDF `[.63, .07, .27, .57, .37, .00, .27, .00, .30, .00]`. RSDF improves the matched baseline by 6 absolute points, but tasks 5/7/9 remain unsolved and task 6 drops, so the result is a strong screening signal rather than a finished benchmark claim.
 
 ## Per-Task LIBERO-Core-LT Results
 
@@ -79,6 +93,8 @@ latexmk -pdf -interaction=nonstopmode main.tex
 
 ## Claim Boundary
 
-RBTAD/TCAD is the main end-to-end method in this draft. Selective projector merge and other variants are retained only as diagnostic evidence, not as the proposed method.
+RBTAD/TCAD remains the Core-LT training-objective branch. For Spatial-LT, the current best method is RSDF vision+LLM, which is a simple checkpoint-delta fusion diagnostic rather than a new inference-time module.
 
 The current result should not be described as a final SOTA result until we add multi-seed evaluation, stronger protocol matching, and at least one additional simulated long-tail split. The repository intentionally excludes local transfer archives, generated environments, LaTeX build products, APA reference files, and large raster exports.
+
+

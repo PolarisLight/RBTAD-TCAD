@@ -1,20 +1,20 @@
-# Spatial-LT Baseline vs RBTAD Verification
+﻿# Spatial-LT Baseline vs RSDF Verification
 
-Date: 2026-07-17
+Date: 2026-07-18
 
-Goal: complete a runnable verification loop for LIBERO-Spatial-LT baseline vs RBTAD without occupying more than GPUs 2 and 3 on server 23.
+Goal: complete a theory-method-experiment-reflection loop for LIBERO-Spatial-LT and identify a simple method that improves over a matched BC baseline without adding inference-time modules or model complexity.
 
-Constraints:
-- Remote: `cyh@59.77.7.23:/mnt/data/cyh/VLA-long-tail`
+Remote execution:
+- Host: `cyh@59.77.7.23:/mnt/data/cyh/VLA-long-tail`
 - Environment: `/mnt/data/cyh/envs/vla-long-tail`
-- Use at most GPUs 2 and 3.
-- Do not interrupt other users' processes.
-- Do not treat single-seed screening as a final SOTA claim.
+- GPUs: at most physical GPU 2 and 3; GPU 0/1 were not used by this run.
 
-Minimum completion criteria:
-- `libero_spatial_lt` is registered and dry-run dataset parsing passes.
-- Baseline and RBTAD 5-step smoke both pass.
-- RBTAD debug shows `TCAD active_count > 0`.
-- Spatial-LT tail weighting is active.
-- 1000-step matched screening is started or completed with reproducible paths.
-- Code, state, and notes are committed locally and pushed unless blocked by a clear risk.
+Success criteria:
+- `libero_spatial_lt` resolves through OXE config/mixture/transform and TFDS.
+- Baseline/RBTAD smoke runs validate dataloader, TCAD activation, and tail weighting.
+- Matched baseline vs proposed method is evaluated under the same seed/checkpoint/eval protocol.
+- The method improves the matched 30-trial baseline by at least 5 absolute points.
+- All scripts, state, notes, and reproducible paths are persisted in the local repository.
+
+Current best method:
+- Relation-Localized Delta Fusion (RSDF), vision+LLM blend from baseline-1000 and BARC-p100, keeping projector fixed from baseline.
