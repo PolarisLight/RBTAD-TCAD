@@ -108,6 +108,13 @@ A paired closed-loop diagnostic was run on server23 (`/mnt/data/cyh/spatial_lt_r
 | 13 | **26.0%** | 24.0% | RSDF improves T3 but drops T6/T7/T8. |
 
 This explains why the original RSDF direction had signal but later fusion variants became worse: the useful change is relation-specific closed-loop timing, not a globally safe parameter delta. The next method should be an end-to-end closed-loop risk-gated correction objective.
+
+### CRGR Active Screen
+
+CRGR (Closed-loop Risk-Gated Replay) is the current active Spatial-LT branch. It keeps RSDF as the protected current best, then runs a short end-to-end weighted BC recovery pass from the RSDF checkpoint. The weights are computed from paired rollout behavior shifts only: longer rollouts, lower mean action norm, or large gripper-close timing shifts increase replay weight. Success labels are not used to build the weights, and inference remains unchanged.
+
+Current run: server23 PID 3960780, log /mnt/data/cyh/spatial_lt_crgr_screen_20260719_192030.log, risk manifest /mnt/data/cyh/spatial_lt_crgr_risk_weights_20260719_192030.json. Both 5-step smoke runs passed with weighted samples active; seed7 100-step checkpoint has been saved and seed13 100-step is running. Heldout evaluation uses init ids 5..14, 10 trials/task, comparing baseline, RSDF, and CRGR for seeds 7 and 13.
+
 ## Per-Task LIBERO-Core-LT Results
 
 These are local 30-rollout-per-task numbers. The local BC row is a reproduced checkpoint evaluation, not the three-seed number reported in the original APA paper.
@@ -139,6 +146,7 @@ latexmk -pdf -interaction=nonstopmode main.tex
 RBTAD/TCAD remains the Core-LT training-objective branch. For Spatial-LT, RSDF vision+LLM is the current best diagnostic direction, but seed 13 reduces the gain from +6 points to +1 point.
 
 The current result should not be described as a final SOTA result until a revised method delivers a consistent multi-seed gain, stronger protocol matching, and at least one additional simulated long-tail split. The repository intentionally excludes local transfer archives, generated environments, LaTeX build products, APA reference files, and large raster exports.
+
 
 
 

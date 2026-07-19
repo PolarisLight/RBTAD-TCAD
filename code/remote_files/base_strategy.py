@@ -416,6 +416,8 @@ class TrainingStrategy(ABC):
                     use_sample_weights = (
                         float(os.environ.get("RARE_BC_WEIGHT", "1.0")) != 1.0
                         or float(os.environ.get("TARGET_TASK_WEIGHT", "1.0")) != 1.0
+                        or bool(os.environ.get("RISK_BC_WEIGHT_MANIFEST", "").strip())
+                        or bool(os.environ.get("RISK_BC_WEIGHTS_JSON", "").strip())
                     )
                     confusion_gated_rare = os.environ.get("RARE_BC_CONFUSION_ONLY", "0").lower() in {
                         "1",
@@ -656,3 +658,4 @@ class TrainingStrategy(ABC):
                 # Update Progress Bar
                 progress.update()
                 progress.set_description(status)
+

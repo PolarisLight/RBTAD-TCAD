@@ -1,9 +1,9 @@
 ﻿{
-    "iteration":  29,
-    "status":  "rollout_diag_pair_complete_next_method_design",
+    "iteration":  30,
+    "status":  "crgr_heldout_screen_running",
     "stale_count":  0,
     "total_findings":  40,
-    "last_update":  "2026-07-19T19:08:00+08:00",
+    "last_update":  "2026-07-19T19:31:00+08:00",
     "remote":  "cyh@59.77.7.23:/mnt/data/cyh/VLA-long-tail",
     "gpu_policy":  "use at most physical GPUs 2 and 3; never interrupt other users",
     "current_best":  {
@@ -76,7 +76,7 @@
                            "C-RSDF confirms that more conservative checkpoint fusion is not the fix: seed7 only +2 over fixed-init baseline and below RSDF/AHP, seed13 ties fixed-init baseline while task0 and task6 remain weak.",
                            "The next method must be based on closed-loop rollout-state error diagnosis/correction, not another parameter-fusion microvariant."
                        ],
-    "next_structural_direction":  "Design an end-to-end closed-loop risk-gated training objective: preserve baseline behavior on relations where RSDF harms rollout success/timing, while allowing relation correction where diagnostic rollouts show consistent shorter-success trajectories.",
+    "next_structural_direction":  "Evaluate CRGR heldout fixed-init results against baseline and RSDF; keep RSDF as protected current best unless CRGR improves both seeds without task collapse.",
     "negative_screens":  {
                              "SPRC":  {
                                           "seed7":  0.17,
@@ -191,5 +191,15 @@
                                                                ]
                                          },
                               "conclusion":  "RSDF creates real closed-loop gains by shortening successful rollouts on relation-sensitive tasks, but it also trades away tasks 2/7/8 depending on seed. Damage is tied to relation-specific gripper timing, rollout length, and action norm shifts rather than a global action-scale issue."
-                          }
+                          },
+    "current_experiment":  {
+                               "method":  "CRGR: Closed-loop Risk-Gated Replay",
+                               "stamp":  "20260719_192030",
+                               "pid":  3960780,
+                               "log":  "/mnt/data/cyh/spatial_lt_crgr_screen_20260719_192030.log",
+                               "risk_manifest":  "/mnt/data/cyh/spatial_lt_crgr_risk_weights_20260719_192030.json",
+                               "gpu_policy":  "physical GPUs 2 and 3 only",
+                               "protocol":  "seed7/seed13 smoke passed; 100-step matched CRGR from RSDF; heldout eval init ids 5..14; 10 trials/task baseline vs RSDF vs CRGR",
+                               "status":  "running; seed7 100-step checkpoint saved; seed13 100-step training started"
+                           }
 }

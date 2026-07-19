@@ -7,6 +7,7 @@ format to OpenVLA, IterableDataset shim.
 
 from dataclasses import dataclass
 import hashlib
+import json
 import re
 import random
 import os
@@ -75,6 +76,31 @@ TCAD_DATASET_ALIASES = {
 }
 
 
+
+_RISK_WEIGHT_CACHE = {}
+
+
+def _risk_bc_weight(instruction: str) -> float:
+    manifest_path = os.environ.get("RISK_BC_WEIGHT_MANIFEST", "").strip()
+    inline_json = os.environ.get("RISK_BC_WEIGHTS_JSON", "").strip()
+    if not manifest_path and not inline_json:
+        return 1.0
+    cache_key = (manifest_path, inline_json)
+    weights = _RISK_WEIGHT_CACHE.get(cache_key)
+    if weights is None:
+        payload = {}
+        if manifest_path:
+            with open(manifest_path, "r", encoding="utf-8") as f:
+                payload = json.load(f)
+        elif inline_json:
+            payload = json.loads(inline_json)
+        if isinstance(payload, dict) and "weights" in payload:
+            payload = payload["weights"]
+        if not isinstance(payload, dict):
+            payload = {}
+        weights = {str(key).lower(): float(value) for key, value in payload.items()}
+        _RISK_WEIGHT_CACHE[cache_key] = weights
+    return float(weights.get(instruction.lower(), 1.0))
 def _tcad_normalize_dataset_name(dataset_name: Any) -> str:
     if isinstance(dataset_name, bytes):
         dataset_name = dataset_name.decode("utf-8")
@@ -211,6 +237,9 @@ class RLDSBatchTransform:
         ]
         if target_task_instructions and lang in target_task_instructions and target_task_weight != 1.0:
             sample_weight = target_task_weight
+        risk_weight = _risk_bc_weight(lang)
+        if risk_weight != 1.0:
+            sample_weight *= risk_weight
         tcad_active = False
         negative_input_ids, negative_labels = input_ids, labels
         if tcad_ratio > 0 and random.random() < tcad_ratio:
@@ -430,3 +459,4 @@ class DummyDataset(Dataset):
         labels[: -(len(action) + 1)] = IGNORE_INDEX
 
         return dict(pixel_values=pixel_values, input_ids=input_ids, labels=labels)
+

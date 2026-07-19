@@ -98,6 +98,8 @@ class TrainConfig:
     tail_focal_max_count: int = 0                                    # Enable tail focal BC for tasks at/below this count
     anchor_l2_lambda: float = 0.0                                   # L2-SP weight to keep short fine-tunes near the loaded checkpoint
     anchor_l2_filter: str = ""                                      # Comma-separated trainable-parameter name filters for anchor L2
+    risk_bc_weight_manifest: str = ""                               # JSON mapping language instructions to closed-loop risk replay weights
+    risk_bc_weights_json: str = ""                                  # Inline JSON alternative to risk_bc_weight_manifest
     trainable_filter: str = ""                                      # Comma-separated parameter-name filters; non-matching params are frozen
     extra_trainable_filter: str = ""                                # Comma-separated frozen parameter-name filters to unfreeze after stage setup
     train_limit_steps: Optional[int] = None                         # Optional hard stop for short fine-tuning runs
@@ -293,6 +295,8 @@ def train(cfg: TrainConfig) -> None:
     os.environ["TAIL_FOCAL_MAX_COUNT"] = str(cfg.tail_focal_max_count if cfg.tail_focal_lambda > 0 else 0)
     os.environ["ANCHOR_L2_LAMBDA"] = str(cfg.anchor_l2_lambda)
     os.environ["ANCHOR_L2_FILTER"] = cfg.anchor_l2_filter
+    os.environ["RISK_BC_WEIGHT_MANIFEST"] = cfg.risk_bc_weight_manifest
+    os.environ["RISK_BC_WEIGHTS_JSON"] = cfg.risk_bc_weights_json
     if cfg.anchor_l2_lambda > 0 and cfg.pretrained_checkpoint is None:
         raise ValueError("anchor_l2_lambda > 0 requires pretrained_checkpoint as the anchor point")
     if cfg.train_limit_steps is not None:
@@ -391,3 +395,4 @@ def train(cfg: TrainConfig) -> None:
 if __name__ == "__main__":
 
     train()
+
