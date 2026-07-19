@@ -98,9 +98,16 @@ After the mixed RSDF confirmation, we tested four simpler stabilization attempts
 Reflection: the failures point to a stability-plasticity problem in action space rather than merely in parameter space. Tail-Focal BC shows that offline tail action-token sharpening can be active yet unstable; fixed-init action gain rejects simple execution-side scaling; AHP-RSDF rejects protecting only the action embedding/head; and C-RSDF rejects more conservative checkpoint fusion. The protected current best remains RSDF vision+LLM alpha=0.5, while the next branch pivots to closed-loop rollout-state diagnosis/correction instead of more local fusion variants.
 
 
-### Active Rollout-State Diagnostic
+### Rollout-State Diagnostic
 
-A paired closed-loop diagnostic is running on server23 (`/mnt/data/cyh/spatial_lt_rollout_diag_pair_20260719_173523.log`). It compares baseline and protected RSDF for seed 7 and seed 13 with fixed init ids 0..4 and 5 trials/task, exporting success, rollout length, first gripper-close step, action norm, sampled proprio states, and failed final frames. This is the next evidence source for an end-to-end rollout-state correction objective.
+A paired closed-loop diagnostic was run on server23 (`/mnt/data/cyh/spatial_lt_rollout_diag_pair_20260719_173523.log`) with fixed init ids 0..4 and 5 trials/task. It compares baseline and protected RSDF while exporting success, rollout length, first gripper-close step, action norm, sampled proprio states, and failed final frames.
+
+| Seed | Baseline | RSDF | Main task-level change |
+| ---: | ---: | ---: | --- |
+| 7 | 22.0% | **28.0%** | RSDF improves T0/T3/T6/T8 but drops T2. |
+| 13 | **26.0%** | 24.0% | RSDF improves T3 but drops T6/T7/T8. |
+
+This explains why the original RSDF direction had signal but later fusion variants became worse: the useful change is relation-specific closed-loop timing, not a globally safe parameter delta. The next method should be an end-to-end closed-loop risk-gated correction objective.
 ## Per-Task LIBERO-Core-LT Results
 
 These are local 30-rollout-per-task numbers. The local BC row is a reproduced checkpoint evaluation, not the three-seed number reported in the original APA paper.
@@ -132,6 +139,8 @@ latexmk -pdf -interaction=nonstopmode main.tex
 RBTAD/TCAD remains the Core-LT training-objective branch. For Spatial-LT, RSDF vision+LLM is the current best diagnostic direction, but seed 13 reduces the gain from +6 points to +1 point.
 
 The current result should not be described as a final SOTA result until a revised method delivers a consistent multi-seed gain, stronger protocol matching, and at least one additional simulated long-tail split. The repository intentionally excludes local transfer archives, generated environments, LaTeX build products, APA reference files, and large raster exports.
+
+
 
 
 

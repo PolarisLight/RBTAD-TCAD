@@ -78,8 +78,8 @@
                   },
                   {
                       "name":  "Paired rollout-state diagnostic",
-                      "result":  "running: baseline vs protected RSDF on seed7/seed13, fixed init ids 0..4, 5 trials/task; records closed-loop steps, gripper close_step, action norm, sampled states, and failure final frames"
+                      "result":  "complete: fixed-init 5-trial seed7 baseline 0.22 vs RSDF 0.28, seed13 baseline 0.26 vs RSDF 0.24. RSDF helps task0/3/6/8 on seed7 and task3 on seed13, but hurts task2 on seed7 and task6/7/8 on seed13; points to relation-specific closed-loop timing tradeoff."
                   }
               ],
-    "next_structural_direction":  "Use paired rollout diagnostics to choose an end-to-end closed-loop correction target; do not launch another checkpoint-fusion variant without a new diagnostic cause."
+    "next_structural_direction":  "Closed-loop risk-gated end-to-end correction: use rollout diagnostic risk to preserve baseline behavior on fragile relations and correct only relations with positive closed-loop evidence."
 }

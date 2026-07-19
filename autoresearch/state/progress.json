@@ -1,9 +1,9 @@
 ﻿{
-    "iteration":  28,
-    "status":  "rollout_diag_pair_running",
+    "iteration":  29,
+    "status":  "rollout_diag_pair_complete_next_method_design",
     "stale_count":  0,
-    "total_findings":  39,
-    "last_update":  "2026-07-19T17:38:00+08:00",
+    "total_findings":  40,
+    "last_update":  "2026-07-19T19:08:00+08:00",
     "remote":  "cyh@59.77.7.23:/mnt/data/cyh/VLA-long-tail",
     "gpu_policy":  "use at most physical GPUs 2 and 3; never interrupt other users",
     "current_best":  {
@@ -76,7 +76,7 @@
                            "C-RSDF confirms that more conservative checkpoint fusion is not the fix: seed7 only +2 over fixed-init baseline and below RSDF/AHP, seed13 ties fixed-init baseline while task0 and task6 remain weak.",
                            "The next method must be based on closed-loop rollout-state error diagnosis/correction, not another parameter-fusion microvariant."
                        ],
-    "next_structural_direction":  "Paired rollout-state diagnostic running on server23 GPUs 2/3: baseline vs RSDF for seed7/seed13, fixed init ids 0..4, 5 trials/task, exporting success, steps, close_step, action norm, sampled states, and failure final frames.",
+    "next_structural_direction":  "Design an end-to-end closed-loop risk-gated training objective: preserve baseline behavior on relations where RSDF harms rollout success/timing, while allowing relation correction where diagnostic rollouts show consistent shorter-success trajectories.",
     "negative_screens":  {
                              "SPRC":  {
                                           "seed7":  0.17,
@@ -128,5 +128,68 @@
                                             "seed13_delta":  0,
                                             "conclusion":  "cross-seed sign-consensus BARC delta is too blunt; rejected and used as evidence to pivot away from fusion microvariants"
                                         }
-                         }
+                         },
+    "rollout_diag_pair":  {
+                              "stamp":  "20260719_173523",
+                              "log":  "/mnt/data/cyh/spatial_lt_rollout_diag_pair_20260719_173523.log",
+                              "seed7":  {
+                                            "baseline":  0.22,
+                                            "rsdf":  0.28,
+                                            "delta":  0.06,
+                                            "baseline_per_task":  [
+                                                                      0.6,
+                                                                      0,
+                                                                      0.2,
+                                                                      0.6,
+                                                                      0.2,
+                                                                      0,
+                                                                      0.6,
+                                                                      0,
+                                                                      0,
+                                                                      0
+                                                                  ],
+                                            "rsdf_per_task":  [
+                                                                  0.8,
+                                                                  0,
+                                                                  0,
+                                                                  0.8,
+                                                                  0.2,
+                                                                  0,
+                                                                  0.8,
+                                                                  0,
+                                                                  0.2,
+                                                                  0
+                                                              ]
+                                        },
+                              "seed13":  {
+                                             "baseline":  0.26,
+                                             "rsdf":  0.24,
+                                             "delta":  -0.02,
+                                             "baseline_per_task":  [
+                                                                       0.4,
+                                                                       0,
+                                                                       0.4,
+                                                                       0.4,
+                                                                       0,
+                                                                       0,
+                                                                       1,
+                                                                       0.2,
+                                                                       0.2,
+                                                                       0
+                                                                   ],
+                                             "rsdf_per_task":  [
+                                                                   0.4,
+                                                                   0,
+                                                                   0.4,
+                                                                   0.8,
+                                                                   0,
+                                                                   0,
+                                                                   0.8,
+                                                                   0,
+                                                                   0,
+                                                                   0
+                                                               ]
+                                         },
+                              "conclusion":  "RSDF creates real closed-loop gains by shortening successful rollouts on relation-sensitive tasks, but it also trades away tasks 2/7/8 depending on seed. Damage is tied to relation-specific gripper timing, rollout length, and action norm shifts rather than a global action-scale issue."
+                          }
 }
