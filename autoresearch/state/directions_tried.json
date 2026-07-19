@@ -58,8 +58,12 @@
                   },
                   {
                       "name":  "Tail-Focal BC",
-                      "result":  "running: seed7 5-step smoke passed with finite tail_focal_loss and tail_hit_count\u003e0; seed7/seed13 100-step 10-trial screening launched on GPUs 2/3"
+                      "result":  "seed7 10-trial 0.15 and seed13 0.19; rejected as unstable despite finite tail_focal_loss and tail_hit_count\u003e0 in smoke/full correction debug"
+                  },
+                  {
+                      "name":  "Tail Action-Gain diagnostic",
+                      "result":  "next experiment: evaluation-time causal diagnostic for rollout-observed low action norm; not a final method unless it shows robust matched gains"
                   }
               ],
-    "next_structural_direction":  "If Tail-Focal fails, pivot from offline BC reshaping to rollout-state correction or data augmentation over visited failure states; do not continue TCAD margin variants."
+    "next_structural_direction":  "Run a causal rollout-action diagnostic before implementing heavier rollout-state correction. Do not continue offline TCAD/focal variants unless the diagnostic supports action norm as causal."
 }

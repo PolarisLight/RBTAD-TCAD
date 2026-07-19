@@ -86,8 +86,10 @@ After the mixed RSDF confirmation, we tested four simpler stabilization attempts
 | RLCT LLM-only relation-localized correction | 13 | 10 | 18.0% | It recovers seed 13 relative to CGRBC but not enough for a reliable gain. |
 | NB-TCAD negative-branch TCAD | 7 | 10 | 16.0% | Detaching the positive branch made TCAD almost inactive. |
 | NB-TCAD negative-branch TCAD | 13 | 10 | 15.0% | Rejected; points to rollout-state rather than teacher-forced margin failures. |
+| Tail-Focal BC | 7 | 10 | 15.0% | Active tail focal loss, but seed 7 drops; offline action-token sharpening is not enough. |
+| Tail-Focal BC | 13 | 10 | 19.0% | Small lift over seed 13 baseline, but not reliable across seeds. |
 
-Reflection: the failures point to a stability-plasticity problem in action space rather than merely in parameter space. The next method should diagnose rollout-state relation failures before adding stronger corrective gradients, instead of adding inference-time modules or sweeping more fusion weights.
+Reflection: the failures point to a stability-plasticity problem in action space rather than merely in parameter space. The Tail-Focal BC screen further shows that offline tail action-token sharpening can be active yet unstable. The next experiment is a narrow rollout action-gain diagnostic to test whether the observed low action norm is causal; if not, the branch should move to rollout-state data/correction rather than another teacher-forced loss.
 
 ## Per-Task LIBERO-Core-LT Results
 
