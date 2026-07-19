@@ -114,6 +114,11 @@ This explains why the original RSDF direction had signal but later fusion varian
 CRGR (Closed-loop Risk-Gated Replay) keeps RSDF as the protected current best, then runs a short end-to-end weighted BC recovery pass from the RSDF checkpoint. The weights are computed from paired rollout behavior shifts only: longer rollouts, lower mean action norm, or large gripper-close timing shifts increase replay weight. Success labels are not used to build the weights, and inference remains unchanged.
 
 Heldout fixed-init screen, init ids 5..14, 10 trials/task: seed 7 baseline 16.0%, RSDF 20.0%, CRGR 21.0%; seed 13 baseline 14.0%, RSDF 13.0%, CRGR 8.0%. CRGR is therefore rejected as a final method. It gives the desired seed7 recovery but damages seed13 much more, showing that unprotected risk replay can overwrite baseline relation/action behavior. The next branch should add explicit baseline behavior preservation rather than another replay-weight variant.
+### BPC-RSDF Active Screen
+
+BPC-RSDF (Baseline-Preserved Correction from RSDF) is the current active branch after rejecting CRGR. It initializes from the seed-matched RSDF checkpoint and adds an action-token KL term from the seed-matched baseline-1000 teacher only on manifest-protected instructions. Closed-loop risk controls `bp_weight` and `tcad_enable`; it no longer upweights BC replay. The first GPU-teacher attempt OOMed under two-rank FSDP, so the active screen uses a CPU frozen teacher and keeps the RSDF student on physical GPUs 2/3.
+
+Server23 run `20260719_223327` has passed both seed7 and seed13 5-step smokes: `bp_count > 0`, finite `bp_loss`, `mean_sample_weight = 1.0`, and at least one TCAD active row. The 50-step matched heldout screen is running with init ids 5..14 and 10 trials/task. The method will be rejected unless both seeds are non-regressive versus RSDF.
 ## Per-Task LIBERO-Core-LT Results
 
 These are local 30-rollout-per-task numbers. The local BC row is a reproduced checkpoint evaluation, not the three-seed number reported in the original APA paper.
@@ -145,4 +150,3 @@ latexmk -pdf -interaction=nonstopmode main.tex
 RBTAD/TCAD remains the Core-LT training-objective branch. For Spatial-LT, RSDF vision+LLM is the current best diagnostic direction, but seed 13 reduces the gain from +6 points to +1 point.
 
 The current result should not be described as a final SOTA result until a revised method delivers a consistent multi-seed gain, stronger protocol matching, and at least one additional simulated long-tail split. The repository intentionally excludes local transfer archives, generated environments, LaTeX build products, APA reference files, and large raster exports.
-

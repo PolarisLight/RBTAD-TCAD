@@ -1,4 +1,4 @@
-# Iteration Log
+﻿# Iteration Log
 
 ## Iteration 1
 
@@ -34,3 +34,17 @@ Seed13 heldout fixed-init result: baseline 0.14, RSDF 0.13, CRGR 0.08. Per-task 
 
 Reflection update:
 CRGR is rejected as the final method. It confirms the theoretical critique: behavior-risk replay without an explicit baseline behavior-preservation term can overwrite relations that baseline still solves. The next method should preserve baseline actions on fragile/high-baseline relations while allowing RSDF-like correction only where rollout behavior suggests safe improvement.
+
+## Iteration 31 - BPC-RSDF baseline-preserved correction
+
+Theory:
+CRGR failed because behavior-risk replay amplified biased closed-loop states and overwrote policies that RSDF or baseline still solved. The correction should therefore be constrained by an explicit non-regression signal instead of relying on initialization alone.
+
+Method:
+BPC-RSDF starts from the RSDF checkpoint and adds action-token KL from a frozen seed-matched baseline teacher only on manifest-protected instructions. Risk controls bp_weight/tcad_enable, not BC replay weight. TCAD remains detached-positive and low weight; sample_weight stays 1.0.
+
+Experiment:
+GPU teacher OOMed at smoke, so the active implementation moved the teacher to CPU. Seed7 and seed13 5-step smokes passed with bp_count>0, finite bp_loss, mean_sample_weight=1.0, and at least one TCAD active row. Server23 log: /mnt/data/cyh/spatial_lt_bpc_rsdf_screen_20260719_223327.log. The 50-step matched screen is running on GPUs 2/3 only.
+
+Reflection:
+This is slower but addresses the exact CRGR failure mode. Acceptance is non-regression against RSDF on both seeds; if either seed drops materially, reject it as another stabilizer/correction conflict rather than tuning weights blindly.

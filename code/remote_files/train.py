@@ -100,6 +100,12 @@ class TrainConfig:
     anchor_l2_filter: str = ""                                      # Comma-separated trainable-parameter name filters for anchor L2
     risk_bc_weight_manifest: str = ""                               # JSON mapping language instructions to closed-loop risk replay weights
     risk_bc_weights_json: str = ""                                  # Inline JSON alternative to risk_bc_weight_manifest
+    bp_preserve_manifest: str = ""                                  # JSON manifest with bp_weight/tcad_enable per instruction
+    bp_preserve_json: str = ""                                      # Inline JSON alternative to bp_preserve_manifest
+    baseline_teacher_checkpoint: Optional[Path] = None                  # Frozen baseline teacher for behavior preservation
+    bp_lambda: float = 0.0                                              # Action-token KL weight to preserve baseline behavior
+    bp_temperature: float = 1.0                                         # KL distillation temperature
+    bp_teacher_device: str = "cpu"                                      # cpu | cuda; CPU avoids replicated-teacher GPU OOM
     trainable_filter: str = ""                                      # Comma-separated parameter-name filters; non-matching params are frozen
     extra_trainable_filter: str = ""                                # Comma-separated frozen parameter-name filters to unfreeze after stage setup
     train_limit_steps: Optional[int] = None                         # Optional hard stop for short fine-tuning runs
@@ -297,6 +303,10 @@ def train(cfg: TrainConfig) -> None:
     os.environ["ANCHOR_L2_FILTER"] = cfg.anchor_l2_filter
     os.environ["RISK_BC_WEIGHT_MANIFEST"] = cfg.risk_bc_weight_manifest
     os.environ["RISK_BC_WEIGHTS_JSON"] = cfg.risk_bc_weights_json
+    os.environ["BP_PRESERVE_MANIFEST"] = cfg.bp_preserve_manifest
+    os.environ["BP_PRESERVE_JSON"] = cfg.bp_preserve_json
+    os.environ["BP_LAMBDA"] = str(cfg.bp_lambda)
+    os.environ["BP_TEMPERATURE"] = str(cfg.bp_temperature)
     if cfg.anchor_l2_lambda > 0 and cfg.pretrained_checkpoint is None:
         raise ValueError("anchor_l2_lambda > 0 requires pretrained_checkpoint as the anchor point")
     if cfg.train_limit_steps is not None:
@@ -358,7 +368,25 @@ def train(cfg: TrainConfig) -> None:
     train_strategy.run_setup(run_dir=run_dir, n_train_examples=len(vla_dataset))
     if cfg.anchor_l2_lambda > 0:
         train_strategy.init_anchor_l2_params()
-
+    if cfg.bp_lambda > 0:
+        if cfg.baseline_teacher_checkpoint is None:
+            raise ValueError("bp_lambda > 0 requires baseline_teacher_checkpoint")
+        overwatch.info(f"Loading frozen baseline teacher from `{cfg.baseline_teacher_checkpoint}`", ctx_level=1)
+        baseline_teacher = load_vla(
+            cfg.baseline_teacher_checkpoint,
+            hf_token=hf_token,
+            load_for_training=True,
+            image_sequence_len=cfg.image_sequence_len,
+        )
+        for param in baseline_teacher.parameters():
+            param.requires_grad_(False)
+        baseline_teacher.eval()
+        teacher_device = cfg.bp_teacher_device.strip().lower()
+        if teacher_device == "cuda":
+            baseline_teacher.to(torch.device("cuda", device_id))
+        elif teacher_device != "cpu":
+            raise ValueError(f"Unsupported bp_teacher_device={cfg.bp_teacher_device}; expected cpu or cuda")
+        train_strategy.set_baseline_teacher(baseline_teacher, cfg.bp_lambda, cfg.bp_temperature)
     # Create Metrics =>> Handles on the fly tracking, logging to specified trackers (e.g., JSONL, Weights & Biases)
     overwatch.info(f"Creating Metrics with Active Trackers => `{cfg.trackers}`")
     metrics = VLAMetrics(

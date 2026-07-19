@@ -101,6 +101,38 @@ def _risk_bc_weight(instruction: str) -> float:
         weights = {str(key).lower(): float(value) for key, value in payload.items()}
         _RISK_WEIGHT_CACHE[cache_key] = weights
     return float(weights.get(instruction.lower(), 1.0))
+
+
+_BP_MANIFEST_CACHE = {}
+
+
+def _bp_manifest_active() -> bool:
+    return bool(os.environ.get("BP_PRESERVE_MANIFEST", "").strip() or os.environ.get("BP_PRESERVE_JSON", "").strip())
+
+
+def _bp_manifest_entry(instruction: str) -> Dict[str, Any]:
+    manifest_path = os.environ.get("BP_PRESERVE_MANIFEST", "").strip()
+    inline_json = os.environ.get("BP_PRESERVE_JSON", "").strip()
+    if not manifest_path and not inline_json:
+        return {}
+    cache_key = (manifest_path, inline_json)
+    entries = _BP_MANIFEST_CACHE.get(cache_key)
+    if entries is None:
+        payload = {}
+        if manifest_path:
+            with open(manifest_path, "r", encoding="utf-8") as f:
+                payload = json.load(f)
+        elif inline_json:
+            payload = json.loads(inline_json)
+        if isinstance(payload, dict) and "tasks" in payload:
+            payload = payload["tasks"]
+        if not isinstance(payload, dict):
+            payload = {}
+        entries = {str(key).lower(): value for key, value in payload.items() if isinstance(value, dict)}
+        _BP_MANIFEST_CACHE[cache_key] = entries
+    return entries.get(instruction.lower(), {})
+
+
 def _tcad_normalize_dataset_name(dataset_name: Any) -> str:
     if isinstance(dataset_name, bytes):
         dataset_name = dataset_name.decode("utf-8")
@@ -229,6 +261,13 @@ class RLDSBatchTransform:
         rare_bc_weight = float(os.environ.get("RARE_BC_WEIGHT", "1.0"))
         task_count = _tcad_task_count(lang, dataset_name)
         sample_weight = rare_bc_weight if rare_bc_max_count > 0 and task_count <= rare_bc_max_count else 1.0
+        bp_entry = _bp_manifest_entry(lang)
+        bp_weight = float(bp_entry.get("bp_weight", 0.0))
+        bp_bc_weight = float(bp_entry.get("bc_weight", 1.0))
+        if bp_bc_weight != 1.0:
+            sample_weight *= bp_bc_weight
+        bp_manifest_enabled = _bp_manifest_active()
+        tcad_enable = bool(bp_entry.get("tcad_enable", not bp_manifest_enabled))
         target_task_weight = float(os.environ.get("TARGET_TASK_WEIGHT", "1.0"))
         target_task_instructions = [
             item.strip().lower()
@@ -249,7 +288,7 @@ class RLDSBatchTransform:
             gripper_positive = bool(float(np.asarray(action)[-1]) > 0)
             tail_max_count = int(os.environ.get("TCAD_TAIL_MAX_COUNT", "0"))
             tail_allowed = tail_max_count <= 0 or task_count <= tail_max_count
-            if wrong_lang is not None and gripper_positive and tail_allowed:
+            if wrong_lang is not None and gripper_positive and tail_allowed and tcad_enable:
                 neg_conversation = [
                     {"from": "human", "value": f"What action should the robot take to {wrong_lang}?"},
                     {"from": "gpt", "value": tokenized_action},
@@ -285,6 +324,7 @@ class RLDSBatchTransform:
             input_ids=input_ids,
             labels=labels,
             sample_weight=torch.tensor(sample_weight, dtype=torch.float32),
+            bp_weight=torch.tensor(bp_weight, dtype=torch.float32),
             task_count=torch.tensor(task_count, dtype=torch.int64),
             negative_input_ids=negative_input_ids,
             negative_labels=negative_labels,

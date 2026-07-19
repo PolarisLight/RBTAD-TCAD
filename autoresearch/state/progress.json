@@ -1,9 +1,9 @@
 ﻿{
-    "iteration":  30,
-    "status":  "crgr_heldout_screen_complete_rejected_next_design",
+    "iteration":  31,
+    "status":  "bpc_rsdf_screen_running",
     "stale_count":  0,
     "total_findings":  40,
-    "last_update":  "2026-07-19T22:12:00+08:00",
+    "last_update":  "2026-07-19T22:58:00+08:00",
     "remote":  "cyh@59.77.7.23:/mnt/data/cyh/VLA-long-tail",
     "gpu_policy":  "use at most physical GPUs 2 and 3; never interrupt other users",
     "current_best":  {
@@ -38,7 +38,7 @@
                            "C-RSDF confirms that more conservative checkpoint fusion is not the fix: seed7 only +2 over fixed-init baseline and below RSDF/AHP, seed13 ties fixed-init baseline while task0 and task6 remain weak.",
                            "The next method must be based on closed-loop rollout-state error diagnosis/correction, not another parameter-fusion microvariant."
                        ],
-    "next_structural_direction":  "Design baseline-preserving closed-loop correction: keep RSDF as current best, but any end-to-end correction must explicitly preserve baseline action behavior on calibration-risk or high-baseline relations rather than only upweighting replay.",
+    "next_structural_direction":  "Evaluate BPC-RSDF with explicit baseline-preservation KL from RSDF; reject if either seed regresses versus RSDF, especially seed13.",
     "negative_screens":  {
                              "SPRC":  {
                                           "seed7":  0.17,
@@ -94,7 +94,10 @@
                                           "seed7_delta":  0.05,
                                           "seed13_delta":  -0.06,
                                           "conclusion":  "behavior-risk weighted replay alone is not stable; it needs baseline behavior preservation or stricter acceptance gating"
-                                      }
+                                      },
+                             "BPC_RSDF_GPU_TEACHER_OOM":  {
+                                                              "conclusion":  "loading the frozen baseline teacher on GPU replicated under two-rank FSDP caused 47GB-per-GPU OOM; CPU teacher fallback is required for this stack"
+                                                          }
                          },
     "rollout_diag_pair":  {
                               "stamp":  "20260719_173523",
@@ -160,14 +163,15 @@
                               "conclusion":  "RSDF creates real closed-loop gains by shortening successful rollouts on relation-sensitive tasks, but it also trades away tasks 2/7/8 depending on seed. Damage is tied to relation-specific gripper timing, rollout length, and action norm shifts rather than a global action-scale issue."
                           },
     "current_experiment":  {
-                               "method":  "CRGR: Closed-loop Risk-Gated Replay",
-                               "stamp":  "20260719_192030",
-                               "pid":  3960780,
-                               "log":  "/mnt/data/cyh/spatial_lt_crgr_screen_20260719_192030.log",
-                               "risk_manifest":  "/mnt/data/cyh/spatial_lt_crgr_risk_weights_20260719_192030.json",
-                               "gpu_policy":  "physical GPUs 2 and 3 only",
-                               "protocol":  "seed7/seed13 smoke passed; 100-step matched CRGR from RSDF; heldout eval init ids 5..14; 10 trials/task baseline vs RSDF vs CRGR",
-                               "status":  "complete; rejected as final method because seed13 collapses"
+                               "method":  "BPC-RSDF: Baseline-Preserved Correction from RSDF",
+                               "stamp":  "20260719_223327",
+                               "log":  "/mnt/data/cyh/spatial_lt_bpc_rsdf_screen_20260719_223327.log",
+                               "bp_manifest":  "/mnt/data/cyh/spatial_lt_bpc_rsdf_manifest_20260719_223327.json",
+                               "source":  "RSDF checkpoints per seed; frozen baseline-1000 teacher per seed",
+                               "gpu_policy":  "physical GPUs 2 and 3 only; GPU 0/1 left idle",
+                               "protocol":  "seed7/seed13 5-step smoke passed; 50-step matched correction running; heldout eval init ids 5..14; 10 trials/task baseline vs RSDF vs BPC-RSDF",
+                               "smoke":  "seed7 and seed13 debug show bp_count\u003e0, finite bp_loss, mean_sample_weight=1.0; GPU-teacher attempt OOMed, CPU teacher is used",
+                               "status":  "running; seed7 50-step started after both smokes passed"
                            },
     "last_negative_result":  {
                                  "method":  "CRGR behavior-risk replay heldout fixed-init 10 trials/task",

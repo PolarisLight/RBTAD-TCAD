@@ -81,6 +81,9 @@ class TrainingStrategy(ABC):
         self.optimizer, self.lr_scheduler = None, None
         self._anchor_l2_params = None
         self._anchor_l2_numel = 0
+        self.baseline_teacher = None
+        self.bp_lambda = 0.0
+        self.bp_temperature = 1.0
 
         # how often to save checkpoints
         self.save_every_n_steps = save_every_n_steps
@@ -308,6 +311,38 @@ class TrainingStrategy(ABC):
         focal = ((1.0 - pt).pow(gamma) * token_ce).masked_fill(~mask, 0.0)
         return focal.sum() / mask.sum().clamp_min(1)
 
+    def set_baseline_teacher(self, teacher, bp_lambda: float, bp_temperature: float = 1.0):
+        self.baseline_teacher = teacher
+        self.bp_lambda = float(bp_lambda)
+        self.bp_temperature = max(float(bp_temperature), 1e-6)
+
+    def _move_batch_value_to_device(self, value, device):
+        if isinstance(value, torch.Tensor):
+            return value.to(device)
+        if isinstance(value, dict):
+            return {key: self._move_batch_value_to_device(item, device) for key, item in value.items()}
+        return value
+
+    def _baseline_preserve_loss(self, student_logits, teacher_logits, labels, bp_weights, action_tokenizer):
+        action_slice = slice(self.vlm.vision_backbone.num_patches, -1)
+        student_action_logits = student_logits[:, action_slice, :].float()
+        teacher_action_logits = teacher_logits[:, action_slice, :].float().to(student_action_logits.device)
+        action_gt = labels[:, 1:].to(student_action_logits.device)
+        mask = (action_tokenizer.action_token_end_idx > action_gt) & (
+            action_gt > action_tokenizer.action_token_begin_idx
+        )
+        weights = bp_weights.to(student_action_logits.device).float().clamp_min(0.0)
+        active = mask & (weights.view(-1, 1) > 0)
+        if not bool(active.any().item()):
+            return student_action_logits.sum() * 0.0
+        temperature = self.bp_temperature
+        teacher_probs = torch.softmax(teacher_action_logits / temperature, dim=-1)
+        student_log_probs = torch.log_softmax(student_action_logits / temperature, dim=-1)
+        token_kl = torch.nn.functional.kl_div(student_log_probs, teacher_probs, reduction="none").sum(dim=-1)
+        token_kl = (token_kl * (temperature ** 2)).masked_fill(~active, 0.0)
+        per_sample = token_kl.sum(dim=1) / active.sum(dim=1).clamp_min(1)
+        return (per_sample * weights).sum() / weights.sum().clamp_min(1.0)
+
     def init_anchor_l2_params(self):
         anchor_weight = float(os.environ.get("ANCHOR_L2_LAMBDA", "0"))
         if anchor_weight <= 0:
@@ -435,6 +470,7 @@ class TrainingStrategy(ABC):
                     tcad_loss = None
                     tcad_loss_term = None
                     tail_focal_loss = None
+                    bp_loss = None
                     corrective_active = None
                     detach_positive_tcad = os.environ.get("TCAD_DETACH_POSITIVE", "0").lower() in {"1", "true", "yes"}
                     tcad_active = batch.get("tcad_active", None)
@@ -503,10 +539,32 @@ class TrainingStrategy(ABC):
                             action_tokenizer,
                         )
                         loss = loss + tail_focal_weight * tail_focal_loss
+                    bp_weight = float(os.environ.get("BP_LAMBDA", "0"))
+                    if (
+                        bp_weight > 0
+                        and self.baseline_teacher is not None
+                        and "bp_weights" in batch
+                        and bool((batch["bp_weights"] > 0).any().item())
+                    ):
+                        teacher_device = next(self.baseline_teacher.parameters()).device
+                        with torch.no_grad():
+                            teacher_output: CausalLMOutputWithPast = self.baseline_teacher(
+                                input_ids=self._move_batch_value_to_device(batch["input_ids"], teacher_device),
+                                attention_mask=self._move_batch_value_to_device(batch["attention_mask"], teacher_device),
+                                pixel_values=self._move_batch_value_to_device(batch["pixel_values"], teacher_device),
+                                labels=self._move_batch_value_to_device(batch["labels"], teacher_device),
+                            )
+                        bp_loss = self._baseline_preserve_loss(
+                            output.logits,
+                            teacher_output.logits,
+                            batch["labels"],
+                            batch["bp_weights"],
+                            action_tokenizer,
+                        )
+                        loss = loss + bp_weight * bp_loss
                     anchor_l2_loss = self._anchor_l2_loss()
                     if anchor_l2_loss is not None:
                         loss = loss + anchor_l2_loss
-
                 # Commit Loss =>> Backward!
                 metrics.commit(loss=loss)
                 tcad_debug_file = os.environ.get("TCAD_DEBUG_FILE")
@@ -515,7 +573,7 @@ class TrainingStrategy(ABC):
                         if metrics.global_step == 0:
                             f.write(
                                 "step,candidate_count,active_count,batch_size,tail_hit_count,"
-                                "weighted_count,mean_sample_weight,tcad_loss,anchor_l2_loss,detach_positive,tail_focal_loss\n"
+                                "weighted_count,mean_sample_weight,bp_count,mean_bp_weight,tcad_loss,anchor_l2_loss,detach_positive,tail_focal_loss,bp_loss\n"
                             )
                         value = "nan" if tcad_loss is None else f"{float(tcad_loss.detach().cpu()):.6f}"
                         anchor_value = (
@@ -541,15 +599,25 @@ class TrainingStrategy(ABC):
                         else:
                             weighted_count = 0
                             mean_sample_weight = 1.0
+                        bp_weights = batch.get("bp_weights", None)
+                        if bp_weights is not None:
+                            bp_values = bp_weights.float()
+                            bp_count = int((bp_values > 0).sum().item())
+                            mean_bp_weight = float(bp_values.mean().item())
+                        else:
+                            bp_count = 0
+                            mean_bp_weight = 0.0
                         tail_focal_value = (
                             "nan"
                             if tail_focal_loss is None
                             else f"{float(tail_focal_loss.detach().cpu()):.6f}"
                         )
+                        bp_value = "nan" if bp_loss is None else f"{float(bp_loss.detach().cpu()):.6f}"
                         f.write(
                             f"{metrics.global_step},{tcad_candidate_count},{tcad_active_count},"
                             f"{batch_size},{tail_hit_count},{weighted_count},{mean_sample_weight:.6f},"
-                            f"{value},{anchor_value},{int(detach_positive_tcad)},{tail_focal_value}\n"
+                            f"{bp_count},{mean_bp_weight:.6f},{value},{anchor_value},{int(detach_positive_tcad)},"
+                            f"{tail_focal_value},{bp_value}\n"
                         )
                 loss.backward()
 
