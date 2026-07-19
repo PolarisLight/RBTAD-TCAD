@@ -84,8 +84,10 @@ After the mixed RSDF confirmation, we tested four simpler stabilization attempts
 | CGRBC 5-step corrective pulse | 13 | 10 | 13.0% | The short correction still fails to generalize. |
 | RLCT LLM-only relation-localized correction | 7 | 10 | 17.0% | Freezing non-LLM parameters is too restrictive for seed 7. |
 | RLCT LLM-only relation-localized correction | 13 | 10 | 18.0% | It recovers seed 13 relative to CGRBC but not enough for a reliable gain. |
+| NB-TCAD negative-branch TCAD | 7 | 10 | 16.0% | Detaching the positive branch made TCAD almost inactive. |
+| NB-TCAD negative-branch TCAD | 13 | 10 | 15.0% | Rejected; points to rollout-state rather than teacher-forced margin failures. |
 
-Reflection: the failures point to a stability-plasticity problem in action space rather than merely in parameter space. The next method should preserve the baseline action distribution while allowing relation-specific corrective gradients, instead of adding inference-time modules or sweeping more fusion weights.
+Reflection: the failures point to a stability-plasticity problem in action space rather than merely in parameter space. The next method should diagnose rollout-state relation failures before adding stronger corrective gradients, instead of adding inference-time modules or sweeping more fusion weights.
 
 ## Per-Task LIBERO-Core-LT Results
 
