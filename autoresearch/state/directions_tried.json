@@ -1,4 +1,4 @@
-{
+﻿{
     "tried":  [
                   {
                       "name":  "full RBTAD",
@@ -70,8 +70,16 @@
                   },
                   {
                       "name":  "AHP-RSDF action-head-preserved fusion",
-                      "result":  "running: protects llm.model.embed_tokens.weight and llm.lm_head.weight during RSDF fusion; fixed-init seed7/seed13 10-trial screen launched"
+                      "result":  "fixed-init 10-trial: seed7 0.20-\u003e0.26, seed13 0.21-\u003e0.20; rejected as not reliable across seeds"
+                  },
+                  {
+                      "name":  "Consensus-Signed RSDF",
+                      "result":  "fixed-init 10-trial: seed7 0.20-\u003e0.22 and seed13 0.21-\u003e0.21; rejected because it underperforms the protected RSDF signal and still damages task0/task6 relation-action behavior"
+                  },
+                  {
+                      "name":  "Paired rollout-state diagnostic",
+                      "result":  "running: baseline vs protected RSDF on seed7/seed13, fixed init ids 0..4, 5 trials/task; records closed-loop steps, gripper close_step, action norm, sampled states, and failure final frames"
                   }
               ],
-    "next_structural_direction":  "Wait for AHP-RSDF fixed-init screen; use 30-trial only if 10-trial fixed-init beats baseline reliably across both seeds."
+    "next_structural_direction":  "Use paired rollout diagnostics to choose an end-to-end closed-loop correction target; do not launch another checkpoint-fusion variant without a new diagnostic cause."
 }

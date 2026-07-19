@@ -1,4 +1,4 @@
-# RBTAD-TCAD
+﻿# RBTAD-TCAD
 
 **Rare-Balanced Task-Conditioned Action Discrimination (RBTAD)** is a preliminary, training-only method for long-tailed embodied imitation learning. It keeps the baseline VLA architecture and inference path unchanged, but adds a task-conditioned action discrimination objective during fine-tuning.
 
@@ -90,9 +90,17 @@ After the mixed RSDF confirmation, we tested four simpler stabilization attempts
 | Tail-Focal BC | 13 | 10 | 19.0% | Small lift over seed 13 baseline, but not reliable across seeds. |
 | Tail action gain, fixed init ids | 7 | 10 | 20.0% -> 20.0% | Identical per-task results; simple execution-side action scaling is not causal. |
 | Tail action gain, fixed init ids | 13 | 10 | 21.0% -> 22.0% | Only +1 point with task swaps; rejected as a reliable method. |
+| AHP-RSDF action-head protected fusion | 7 | 10 | 20.0% -> 26.0% | Preserves the seed7 fixed-init gain while opening tasks 7/8. |
+| AHP-RSDF action-head protected fusion | 13 | 10 | 21.0% -> 20.0% | Rejected: task3 rises but task0/6/7 losses break cross-seed reliability. |
+| Consensus-Signed RSDF | 7 | 10 | 20.0% -> 22.0% | Rejected: conservative delta filtering does not recover the protected RSDF signal and still hurts task6. |
+| Consensus-Signed RSDF | 13 | 10 | 21.0% -> 21.0% | Rejected: ties fixed-init baseline while task0/task6 remain weak. |
 
-Reflection: the failures point to a stability-plasticity problem in action space rather than merely in parameter space. The Tail-Focal BC screen further shows that offline tail action-token sharpening can be active yet unstable. A fixed-init action-gain diagnostic then rejects simple execution-side scaling: seed 7 is unchanged and seed 13 gains only one point. The next branch targets correction-vs-behavior gradient conflict around RSDF rather than another offline loss or action-magnitude patch.
+Reflection: the failures point to a stability-plasticity problem in action space rather than merely in parameter space. Tail-Focal BC shows that offline tail action-token sharpening can be active yet unstable; fixed-init action gain rejects simple execution-side scaling; AHP-RSDF rejects protecting only the action embedding/head; and C-RSDF rejects more conservative checkpoint fusion. The protected current best remains RSDF vision+LLM alpha=0.5, while the next branch pivots to closed-loop rollout-state diagnosis/correction instead of more local fusion variants.
 
+
+### Active Rollout-State Diagnostic
+
+A paired closed-loop diagnostic is running on server23 (`/mnt/data/cyh/spatial_lt_rollout_diag_pair_20260719_173523.log`). It compares baseline and protected RSDF for seed 7 and seed 13 with fixed init ids 0..4 and 5 trials/task, exporting success, rollout length, first gripper-close step, action norm, sampled proprio states, and failed final frames. This is the next evidence source for an end-to-end rollout-state correction objective.
 ## Per-Task LIBERO-Core-LT Results
 
 These are local 30-rollout-per-task numbers. The local BC row is a reproduced checkpoint evaluation, not the three-seed number reported in the original APA paper.
@@ -124,5 +132,8 @@ latexmk -pdf -interaction=nonstopmode main.tex
 RBTAD/TCAD remains the Core-LT training-objective branch. For Spatial-LT, RSDF vision+LLM is the current best diagnostic direction, but seed 13 reduces the gain from +6 points to +1 point.
 
 The current result should not be described as a final SOTA result until a revised method delivers a consistent multi-seed gain, stronger protocol matching, and at least one additional simulated long-tail split. The repository intentionally excludes local transfer archives, generated environments, LaTeX build products, APA reference files, and large raster exports.
+
+
+
 
 
