@@ -286,6 +286,28 @@ class TrainingStrategy(ABC):
         weights = sample_weights.to(per_sample_loss.device).float()
         return (per_sample_loss * weights).sum() / weights.sum().clamp_min(1.0)
 
+    def _tail_focal_action_loss(self, logits, labels, task_counts, max_count, gamma, action_tokenizer):
+        if max_count <= 0:
+            return logits.float().sum() * 0.0
+        action_logits = logits[:, self.vlm.vision_backbone.num_patches : -1].float()
+        action_gt = labels[:, 1:].to(action_logits.device)
+        action_mask = (action_tokenizer.action_token_end_idx > action_gt) & (
+            action_gt > action_tokenizer.action_token_begin_idx
+        )
+        tail_mask = task_counts.to(action_logits.device).view(-1, 1) <= max_count
+        mask = action_mask & tail_mask
+        if not bool(mask.any().item()):
+            return action_logits.sum() * 0.0
+        safe_gt = action_gt.clamp_min(0)
+        token_ce = torch.nn.functional.cross_entropy(
+            action_logits.reshape(-1, action_logits.shape[-1]),
+            safe_gt.reshape(-1),
+            reduction="none",
+        ).reshape_as(action_gt)
+        pt = torch.exp(-token_ce).clamp(min=0.0, max=1.0)
+        focal = ((1.0 - pt).pow(gamma) * token_ce).masked_fill(~mask, 0.0)
+        return focal.sum() / mask.sum().clamp_min(1)
+
     def init_anchor_l2_params(self):
         anchor_weight = float(os.environ.get("ANCHOR_L2_LAMBDA", "0"))
         if anchor_weight <= 0:
@@ -410,6 +432,7 @@ class TrainingStrategy(ABC):
                         )
                     tcad_loss = None
                     tcad_loss_term = None
+                    tail_focal_loss = None
                     corrective_active = None
                     detach_positive_tcad = os.environ.get("TCAD_DETACH_POSITIVE", "0").lower() in {"1", "true", "yes"}
                     tcad_active = batch.get("tcad_active", None)
@@ -467,6 +490,17 @@ class TrainingStrategy(ABC):
                             )
                             if tcad_loss_term is not None:
                                 loss = loss + tcad_loss_term
+                    tail_focal_weight = float(os.environ.get("TAIL_FOCAL_LAMBDA", "0"))
+                    if tail_focal_weight > 0 and "task_counts" in batch:
+                        tail_focal_loss = self._tail_focal_action_loss(
+                            output.logits,
+                            batch["labels"],
+                            batch["task_counts"],
+                            int(os.environ.get("TAIL_FOCAL_MAX_COUNT", "0") or "0"),
+                            float(os.environ.get("TAIL_FOCAL_GAMMA", "2.0")),
+                            action_tokenizer,
+                        )
+                        loss = loss + tail_focal_weight * tail_focal_loss
                     anchor_l2_loss = self._anchor_l2_loss()
                     if anchor_l2_loss is not None:
                         loss = loss + anchor_l2_loss
@@ -479,7 +513,7 @@ class TrainingStrategy(ABC):
                         if metrics.global_step == 0:
                             f.write(
                                 "step,candidate_count,active_count,batch_size,tail_hit_count,"
-                                "weighted_count,mean_sample_weight,tcad_loss,anchor_l2_loss,detach_positive\n"
+                                "weighted_count,mean_sample_weight,tcad_loss,anchor_l2_loss,detach_positive,tail_focal_loss\n"
                             )
                         value = "nan" if tcad_loss is None else f"{float(tcad_loss.detach().cpu()):.6f}"
                         anchor_value = (
@@ -489,7 +523,10 @@ class TrainingStrategy(ABC):
                         )
                         batch_size = int(tcad_active.numel()) if tcad_active is not None else 0
                         task_counts = batch.get("task_counts", None)
-                        tail_limit = int(os.environ.get("TCAD_TAIL_MAX_COUNT", "0") or "0")
+                        tail_limit = max(
+                            int(os.environ.get("TCAD_TAIL_MAX_COUNT", "0") or "0"),
+                            int(os.environ.get("TAIL_FOCAL_MAX_COUNT", "0") or "0"),
+                        )
                         if task_counts is not None and tail_limit > 0:
                             tail_hit_count = int((task_counts.to(output.logits.device) <= tail_limit).sum().item())
                         else:
@@ -502,10 +539,15 @@ class TrainingStrategy(ABC):
                         else:
                             weighted_count = 0
                             mean_sample_weight = 1.0
+                        tail_focal_value = (
+                            "nan"
+                            if tail_focal_loss is None
+                            else f"{float(tail_focal_loss.detach().cpu()):.6f}"
+                        )
                         f.write(
                             f"{metrics.global_step},{tcad_candidate_count},{tcad_active_count},"
                             f"{batch_size},{tail_hit_count},{weighted_count},{mean_sample_weight:.6f},"
-                            f"{value},{anchor_value},{int(detach_positive_tcad)}\n"
+                            f"{value},{anchor_value},{int(detach_positive_tcad)},{tail_focal_value}\n"
                         )
                 loss.backward()
 

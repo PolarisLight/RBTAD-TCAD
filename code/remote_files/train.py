@@ -93,6 +93,9 @@ class TrainConfig:
     tcad_detach_positive: bool = False                              # If true, TCAD gradients only suppress the negative-instruction branch
     rare_bc_max_count: int = 0                                      # If >0, upweight BC loss for tasks at/below this count
     rare_bc_weight: float = 1.0                                     # Per-sample BC weight for rare tasks
+    tail_focal_lambda: float = 0.0                                   # Extra focal BC weight for low-confidence tail action tokens
+    tail_focal_gamma: float = 2.0                                    # Focal exponent for tail_focal_lambda
+    tail_focal_max_count: int = 0                                    # Enable tail focal BC for tasks at/below this count
     anchor_l2_lambda: float = 0.0                                   # L2-SP weight to keep short fine-tunes near the loaded checkpoint
     anchor_l2_filter: str = ""                                      # Comma-separated trainable-parameter name filters for anchor L2
     trainable_filter: str = ""                                      # Comma-separated parameter-name filters; non-matching params are frozen
@@ -285,6 +288,9 @@ def train(cfg: TrainConfig) -> None:
     os.environ["TCAD_DETACH_POSITIVE"] = "1" if cfg.tcad_detach_positive else "0"
     os.environ["RARE_BC_MAX_COUNT"] = str(cfg.rare_bc_max_count if cfg.rare_bc_weight != 1.0 else 0)
     os.environ["RARE_BC_WEIGHT"] = str(cfg.rare_bc_weight)
+    os.environ["TAIL_FOCAL_LAMBDA"] = str(cfg.tail_focal_lambda)
+    os.environ["TAIL_FOCAL_GAMMA"] = str(cfg.tail_focal_gamma)
+    os.environ["TAIL_FOCAL_MAX_COUNT"] = str(cfg.tail_focal_max_count if cfg.tail_focal_lambda > 0 else 0)
     os.environ["ANCHOR_L2_LAMBDA"] = str(cfg.anchor_l2_lambda)
     os.environ["ANCHOR_L2_FILTER"] = cfg.anchor_l2_filter
     if cfg.anchor_l2_lambda > 0 and cfg.pretrained_checkpoint is None:
