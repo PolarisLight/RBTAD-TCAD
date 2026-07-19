@@ -26,3 +26,11 @@ Server23 PID 3960780, GPUs 2/3 only. Risk manifest: /mnt/data/cyh/spatial_lt_crg
 
 Reflection:
 This is a correction to the previous degrading-variant pattern. RSDF remains the protected current best until CRGR proves a cross-seed heldout gain. If CRGR fails, the failure should be interpreted as risk-weighted replay being too blunt, not as evidence for more parameter-fusion microvariants.
+
+CRGR result update:
+Seed7 heldout fixed-init result: baseline 0.16, RSDF 0.20, CRGR 0.21. Per-task CRGR: [0.50, 0.00, 0.30, 0.60, 0.20, 0.00, 0.50, 0.00, 0.00, 0.00].
+
+Seed13 heldout fixed-init result: baseline 0.14, RSDF 0.13, CRGR 0.08. Per-task CRGR: [0.30, 0.00, 0.00, 0.30, 0.10, 0.00, 0.10, 0.00, 0.00, 0.00].
+
+Reflection update:
+CRGR is rejected as the final method. It confirms the theoretical critique: behavior-risk replay without an explicit baseline behavior-preservation term can overwrite relations that baseline still solves. The next method should preserve baseline actions on fragile/high-baseline relations while allowing RSDF-like correction only where rollout behavior suggests safe improvement.

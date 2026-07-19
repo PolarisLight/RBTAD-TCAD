@@ -1,9 +1,9 @@
 ﻿{
     "iteration":  30,
-    "status":  "crgr_heldout_screen_running",
+    "status":  "crgr_heldout_screen_complete_rejected_next_design",
     "stale_count":  0,
     "total_findings":  40,
-    "last_update":  "2026-07-19T19:31:00+08:00",
+    "last_update":  "2026-07-19T22:12:00+08:00",
     "remote":  "cyh@59.77.7.23:/mnt/data/cyh/VLA-long-tail",
     "gpu_policy":  "use at most physical GPUs 2 and 3; never interrupt other users",
     "current_best":  {
@@ -19,44 +19,6 @@
                                         "absolute_gain":  0.01
                                     }
                      },
-    "last_negative_result":  {
-                                 "method":  "Consensus-Signed RSDF fixed-init 10 trials/task",
-                                 "seed7":  {
-                                               "baseline":  0.2,
-                                               "method":  0.22,
-                                               "delta":  0.02,
-                                               "method_per_task":  [
-                                                                       0.7,
-                                                                       0,
-                                                                       0.4,
-                                                                       0.5,
-                                                                       0.2,
-                                                                       0,
-                                                                       0.3,
-                                                                       0,
-                                                                       0.1,
-                                                                       0
-                                                                   ]
-                                           },
-                                 "seed13":  {
-                                                "baseline":  0.21,
-                                                "method":  0.21,
-                                                "delta":  0,
-                                                "method_per_task":  [
-                                                                        0.2,
-                                                                        0,
-                                                                        0.2,
-                                                                        0.8,
-                                                                        0.3,
-                                                                        0,
-                                                                        0.3,
-                                                                        0,
-                                                                        0.2,
-                                                                        0.1
-                                                                    ]
-                                            },
-                                 "conclusion":  "rejected: cross-seed sign-consensus delta does not recover the protected RSDF signal; it still trades relation gains against action/rollout losses, especially task0/task6 degradation."
-                             },
     "remaining_risk":  [
                            "RSDF gain is not reliable across seeds: +6 on seed7 but only +1 on seed13",
                            "SPRC shows full-parameter L2 protection alone does not prevent harmful correction",
@@ -76,7 +38,7 @@
                            "C-RSDF confirms that more conservative checkpoint fusion is not the fix: seed7 only +2 over fixed-init baseline and below RSDF/AHP, seed13 ties fixed-init baseline while task0 and task6 remain weak.",
                            "The next method must be based on closed-loop rollout-state error diagnosis/correction, not another parameter-fusion microvariant."
                        ],
-    "next_structural_direction":  "Evaluate CRGR heldout fixed-init results against baseline and RSDF; keep RSDF as protected current best unless CRGR improves both seeds without task collapse.",
+    "next_structural_direction":  "Design baseline-preserving closed-loop correction: keep RSDF as current best, but any end-to-end correction must explicitly preserve baseline action behavior on calibration-risk or high-baseline relations rather than only upweighting replay.",
     "negative_screens":  {
                              "SPRC":  {
                                           "seed7":  0.17,
@@ -127,7 +89,12 @@
                                             "seed7_delta":  0.02,
                                             "seed13_delta":  0,
                                             "conclusion":  "cross-seed sign-consensus BARC delta is too blunt; rejected and used as evidence to pivot away from fusion microvariants"
-                                        }
+                                        },
+                             "CRGR":  {
+                                          "seed7_delta":  0.05,
+                                          "seed13_delta":  -0.06,
+                                          "conclusion":  "behavior-risk weighted replay alone is not stable; it needs baseline behavior preservation or stricter acceptance gating"
+                                      }
                          },
     "rollout_diag_pair":  {
                               "stamp":  "20260719_173523",
@@ -200,6 +167,48 @@
                                "risk_manifest":  "/mnt/data/cyh/spatial_lt_crgr_risk_weights_20260719_192030.json",
                                "gpu_policy":  "physical GPUs 2 and 3 only",
                                "protocol":  "seed7/seed13 smoke passed; 100-step matched CRGR from RSDF; heldout eval init ids 5..14; 10 trials/task baseline vs RSDF vs CRGR",
-                               "status":  "running; seed7 100-step checkpoint saved; seed13 100-step training started"
-                           }
+                               "status":  "complete; rejected as final method because seed13 collapses"
+                           },
+    "last_negative_result":  {
+                                 "method":  "CRGR behavior-risk replay heldout fixed-init 10 trials/task",
+                                 "seed7":  {
+                                               "baseline":  0.16,
+                                               "rsdf":  0.2,
+                                               "crgr":  0.21,
+                                               "delta_vs_baseline":  0.05,
+                                               "delta_vs_rsdf":  0.01,
+                                               "crgr_per_task":  [
+                                                                     0.5,
+                                                                     0,
+                                                                     0.3,
+                                                                     0.6,
+                                                                     0.2,
+                                                                     0,
+                                                                     0.5,
+                                                                     0,
+                                                                     0,
+                                                                     0
+                                                                 ]
+                                           },
+                                 "seed13":  {
+                                                "baseline":  0.14,
+                                                "rsdf":  0.13,
+                                                "crgr":  0.08,
+                                                "delta_vs_baseline":  -0.06,
+                                                "delta_vs_rsdf":  -0.05,
+                                                "crgr_per_task":  [
+                                                                      0.3,
+                                                                      0,
+                                                                      0,
+                                                                      0.3,
+                                                                      0.1,
+                                                                      0,
+                                                                      0.1,
+                                                                      0,
+                                                                      0,
+                                                                      0
+                                                                  ]
+                                            },
+                                 "conclusion":  "rejected: CRGR gives seed7 heldout gain but catastrophically overwrites seed13 relation/action behavior; closed-loop risk replay needs explicit baseline behavior preservation."
+                             }
 }
