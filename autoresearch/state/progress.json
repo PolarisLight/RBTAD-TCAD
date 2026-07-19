@@ -1,9 +1,9 @@
 {
-    "iteration":  21,
-    "status":  "fixed_init_action_gain_diagnostic_running",
+    "iteration":  24,
+    "status":  "ahp_rsdf_fixed_init_screen_running",
     "stale_count":  0,
-    "total_findings":  31,
-    "last_update":  "2026-07-19T12:27:00+08:00",
+    "total_findings":  35,
+    "last_update":  "2026-07-19T14:55:00+08:00",
     "remote":  "cyh@59.77.7.23:/mnt/data/cyh/VLA-long-tail",
     "gpu_policy":  "use at most physical GPUs 2 and 3; never interrupt other users",
     "current_best":  {
@@ -20,60 +20,60 @@
                                     }
                      },
     "last_negative_result":  {
-                                 "method":  "Tail Action-Gain diagnostic, unfixed init-id 10 trials/task",
+                                 "method":  "Fixed-init Tail Action-Gain diagnostic, 10 trials/task, EVAL_INIT_IDS=0..9",
                                  "seed7":  {
-                                               "baseline":  0.25,
-                                               "gain":  0.19,
-                                               "delta":  -0.06,
+                                               "baseline":  0.2,
+                                               "gain":  0.2,
+                                               "delta":  0,
                                                "baseline_per_task":  [
                                                                          0.7,
                                                                          0,
                                                                          0.2,
+                                                                         0.4,
+                                                                         0.2,
+                                                                         0,
                                                                          0.5,
-                                                                         0.3,
                                                                          0,
-                                                                         0.4,
                                                                          0,
-                                                                         0.4,
                                                                          0
                                                                      ],
                                                "gain_per_task":  [
-                                                                     0.8,
-                                                                     0.1,
+                                                                     0.7,
+                                                                     0,
                                                                      0.2,
                                                                      0.4,
-                                                                     0.3,
+                                                                     0.2,
+                                                                     0,
+                                                                     0.5,
                                                                      0,
                                                                      0,
-                                                                     0,
-                                                                     0.1,
                                                                      0
                                                                  ]
                                            },
                                  "seed13":  {
-                                                "baseline":  0.08,
-                                                "gain":  0.13,
-                                                "delta":  0.05,
+                                                "baseline":  0.21,
+                                                "gain":  0.22,
+                                                "delta":  0.01,
                                                 "baseline_per_task":  [
-                                                                          0.1,
+                                                                          0.4,
+                                                                          0,
                                                                           0.2,
+                                                                          0.7,
+                                                                          0,
+                                                                          0,
+                                                                          0.6,
                                                                           0.1,
-                                                                          0.3,
-                                                                          0,
-                                                                          0,
                                                                           0.1,
-                                                                          0,
-                                                                          0,
                                                                           0
                                                                       ],
                                                 "gain_per_task":  [
-                                                                      0.3,
+                                                                      0.4,
+                                                                      0.1,
+                                                                      0.2,
+                                                                      0.8,
                                                                       0,
                                                                       0,
                                                                       0.6,
-                                                                      0,
-                                                                      0,
-                                                                      0.3,
                                                                       0,
                                                                       0.1,
                                                                       0
@@ -90,9 +90,13 @@
                            "next method must preserve action-space behavior directly, not only parameter-space distance",
                            "NB-TCAD shows positive/negative expert-state margins are mostly already satisfied, so offline TCAD cannot localize rollout relation failures",
                            "next experiments must test rollout-state eligibility or closed-loop diagnostics before another correction loss",
-                           "Tail-Focal BC confirms that offline action-token sharpening can redistribute capacity across tasks and does not reliably solve closed-loop tail failures"
+                           "Tail-Focal BC confirms that offline action-token sharpening can redistribute capacity across tasks and does not reliably solve closed-loop tail failures",
+                           "Fixed-init action gain falsifies simple execution-side action scaling: seed7 unchanged and seed13 only +1 point.",
+                           "Small Spatial-LT screens must use fixed init ids when judging diagnostics, because unfixed 10-trial variation produced misleading swings.",
+                           "BC-gradient projection via two backward passes is incompatible with the current FSDP full-shard training path; do not pursue PCGrad here without a non-FSDP or custom FSDP-safe implementation.",
+                           "AHP-RSDF is checkpoint-level fusion rather than end-to-end training; if it works, the paper framing must justify it as parameter-space behavior preservation or convert it into an equivalent training constraint."
                        ],
-    "next_structural_direction":  "Fixed-init action-gain replication is running with EVAL_INIT_IDS=0..9. Use this to decide whether low action norm is causal; do not build a method claim from unfixed 10-trial diagnostics.",
+    "next_structural_direction":  "AHP-RSDF running: action-head-preserved RSDF protects llm.model.embed_tokens.weight and llm.lm_head.weight while fusing vision_backbone and the rest of llm_backbone; fixed-init 10-trial seed7/seed13 baseline-vs-method screen on GPUs 2/3.",
     "negative_screens":  {
                              "SPRC":  {
                                           "seed7":  0.17,
@@ -128,6 +132,11 @@
                                                               "seed7_delta":  -0.06,
                                                               "seed13_delta":  0.05,
                                                               "conclusion":  "mixed and confounded by uncontrolled init-state/randomness; requires fixed-init replication before causal interpretation"
-                                                          }
+                                                          },
+                             "Tail_Action_Gain_fixedinit":  {
+                                                                "seed7_delta":  0,
+                                                                "seed13_delta":  0.01,
+                                                                "conclusion":  "fixed init ids remove the apparent swings; simple tail-only action scaling is not causal or sufficient"
+                                                            }
                          }
 }

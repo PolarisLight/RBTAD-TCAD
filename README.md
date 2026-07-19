@@ -88,8 +88,10 @@ After the mixed RSDF confirmation, we tested four simpler stabilization attempts
 | NB-TCAD negative-branch TCAD | 13 | 10 | 15.0% | Rejected; points to rollout-state rather than teacher-forced margin failures. |
 | Tail-Focal BC | 7 | 10 | 15.0% | Active tail focal loss, but seed 7 drops; offline action-token sharpening is not enough. |
 | Tail-Focal BC | 13 | 10 | 19.0% | Small lift over seed 13 baseline, but not reliable across seeds. |
+| Tail action gain, fixed init ids | 7 | 10 | 20.0% -> 20.0% | Identical per-task results; simple execution-side action scaling is not causal. |
+| Tail action gain, fixed init ids | 13 | 10 | 21.0% -> 22.0% | Only +1 point with task swaps; rejected as a reliable method. |
 
-Reflection: the failures point to a stability-plasticity problem in action space rather than merely in parameter space. The Tail-Focal BC screen further shows that offline tail action-token sharpening can be active yet unstable. The next experiment is a narrow rollout action-gain diagnostic to test whether the observed low action norm is causal; if not, the branch should move to rollout-state data/correction rather than another teacher-forced loss.
+Reflection: the failures point to a stability-plasticity problem in action space rather than merely in parameter space. The Tail-Focal BC screen further shows that offline tail action-token sharpening can be active yet unstable. A fixed-init action-gain diagnostic then rejects simple execution-side scaling: seed 7 is unchanged and seed 13 gains only one point. The next branch targets correction-vs-behavior gradient conflict around RSDF rather than another offline loss or action-magnitude patch.
 
 ## Per-Task LIBERO-Core-LT Results
 

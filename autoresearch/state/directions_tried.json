@@ -62,8 +62,16 @@
                   },
                   {
                       "name":  "Tail Action-Gain diagnostic",
-                      "result":  "next experiment: evaluation-time causal diagnostic for rollout-observed low action norm; not a final method unless it shows robust matched gains"
+                      "result":  "fixed-init replication: seed7 0.20-\u003e0.20 and seed13 0.21-\u003e0.22; rejected, simple action scaling is not causal"
+                  },
+                  {
+                      "name":  "Gradient-Protected RSDF",
+                      "result":  "5-step smoke failed under FSDP full-shard due two-backward sharded-storage RuntimeError/SIGSEGV; removed from runnable code scope"
+                  },
+                  {
+                      "name":  "AHP-RSDF action-head-preserved fusion",
+                      "result":  "running: protects llm.model.embed_tokens.weight and llm.lm_head.weight during RSDF fusion; fixed-init seed7/seed13 10-trial screen launched"
                   }
               ],
-    "next_structural_direction":  "Run a causal rollout-action diagnostic before implementing heavier rollout-state correction. Do not continue offline TCAD/focal variants unless the diagnostic supports action norm as causal."
+    "next_structural_direction":  "Wait for AHP-RSDF fixed-init screen; use 30-trial only if 10-trial fixed-init beats baseline reliably across both seeds."
 }
