@@ -118,7 +118,7 @@ Heldout fixed-init screen, init ids 5..14, 10 trials/task: seed 7 baseline 16.0%
 
 BPC-RSDF (Baseline-Preserved Correction from RSDF) is the current active branch after rejecting CRGR. It initializes from the seed-matched RSDF checkpoint and adds an action-token KL term from the seed-matched baseline-1000 teacher only on manifest-protected instructions. Closed-loop risk controls `bp_weight` and `tcad_enable`; it no longer upweights BC replay. The first GPU-teacher attempt OOMed under two-rank FSDP, so the active screen uses a CPU frozen teacher and keeps the RSDF student on physical GPUs 2/3.
 
-Server23 run `20260719_223327` has passed both seed7 and seed13 5-step smokes: `bp_count > 0`, finite `bp_loss`, `mean_sample_weight = 1.0`, and at least one TCAD active row. The 50-step matched heldout screen is running with init ids 5..14 and 10 trials/task. The method will be rejected unless both seeds are non-regressive versus RSDF.
+Server23 run `20260719_223327` has passed both seed7 and seed13 5-step smokes: `bp_count > 0`, finite `bp_loss`, `mean_sample_weight = 1.0`, and at least one TCAD active row. The 10-trial heldout screen passed the non-regression gate: seed7 baseline/RSDF/BPC = 16.0%/20.0%/24.0%, and seed13 = 14.0%/13.0%/19.0%. The average gain over the matched baseline is +6.5 points. A six-way 30-trial confirmation is now running on server23 (`/mnt/data/cyh/spatial_lt_bpc_rsdf_confirm30_20260721_014019.log`) before treating this as a final method claim.
 ## Per-Task LIBERO-Core-LT Results
 
 These are local 30-rollout-per-task numbers. The local BC row is a reproduced checkpoint evaluation, not the three-seed number reported in the original APA paper.

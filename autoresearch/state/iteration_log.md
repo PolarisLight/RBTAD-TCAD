@@ -48,3 +48,16 @@ GPU teacher OOMed at smoke, so the active implementation moved the teacher to CP
 
 Reflection:
 This is slower but addresses the exact CRGR failure mode. Acceptance is non-regression against RSDF on both seeds; if either seed drops materially, reject it as another stabilizer/correction conflict rather than tuning weights blindly.
+## Iteration 32 - BPC-RSDF 10-trial screen and 30-trial confirmation launch
+
+Theory:
+The CRGR failure predicted that replay-weighted correction damages seed-specific baseline competence. BPC-RSDF instead treats risk as a preservation gate: risky instructions are pulled toward a seed-matched baseline teacher while the student remains initialized from RSDF.
+
+Method:
+No inference-time module. A 50-step end-to-end correction from RSDF uses action-token KL to the frozen baseline teacher on manifest-protected instructions, low-weight detached-positive TCAD, and no BC replay upweight.
+
+Experiment:
+10-trial heldout init ids 5..14: seed7 baseline/RSDF/BPC = 0.16/0.20/0.24; seed13 = 0.14/0.13/0.19. Average gain over baseline is +6.5 points. Launched six sequential 30-trial confirmation evals: baseline, RSDF, BPC for seed7 and seed13. Log: /mnt/data/cyh/spatial_lt_bpc_rsdf_confirm30_20260721_014019.log.
+
+Reflection:
+This is the first candidate after RSDF that improves both seeds in the fixed heldout screen. It is not final proof yet: if 30-trial confirmation preserves the gain, BPC-RSDF becomes the current candidate method; otherwise classify it as a screening-only stabilizer.
