@@ -15,3 +15,8 @@ BPC-RSDF is the next structural correction after CRGR rejection. It initializes 
 ## 2026-07-21 BPC-RSDF positive screen
 
 BPC-RSDF passes the 10-trial heldout non-regression gate. Seed7 improves from baseline/RSDF 0.16/0.20 to 0.24; seed13 improves from 0.14/0.13 to 0.19. Averaged over the two seeds, BPC-RSDF reaches 0.215 versus baseline 0.150 and RSDF 0.165. This is a +6.5 point screening gain over the matched baseline and +5.0 over RSDF. Because the goal requires reliable proof rather than a screening result, a six-way 30-trial confirmation has been launched.
+## 2026-07-21 BPC-RSDF confirm30 rejection
+
+The 30-trial confirmation falsifies the positive 10-trial BPC-RSDF screen. Under matched 30 trials/task, seed7 baseline/RSDF/BPC-RSDF is 0.21/0.25/0.19. Seed13 baseline/RSDF is 0.13/0.15. BPC seed13 was stopped after BPC seed7 fell below both baseline and RSDF, because continuing the already rejected branch would only waste GPUs.
+
+Reflection: baseline-preservation KL from a frozen teacher is too blunt. It can suppress the very RSDF relation/action correction that produced the protected gain. The correct protected best is RSDF, not BPC-RSDF. The current two-seed RSDF average is 0.20 versus baseline 0.17, a real but insufficient +3 point gain. The next method must preserve RSDF's relation-localized plasticity while addressing its remaining tail failures; it should not add global teacher constraints or replay weights.

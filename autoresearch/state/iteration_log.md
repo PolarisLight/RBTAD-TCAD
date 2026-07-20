@@ -61,3 +61,9 @@ Experiment:
 
 Reflection:
 This is the first candidate after RSDF that improves both seeds in the fixed heldout screen. It is not final proof yet: if 30-trial confirmation preserves the gain, BPC-RSDF becomes the current candidate method; otherwise classify it as a screening-only stabilizer.
+## 2026-07-21 Iteration 31 confirm30 reflection
+
+- Theory audit: BPC-RSDF assumed baseline action-token KL would prevent closed-loop behavior overwrite. Red-team failure: if RSDF's useful signal is itself a local action-distribution shift, teacher KL will over-preserve baseline errors and suppress relation correction.
+- Method outcome: BPC-RSDF remains a diagnostic implementation branch only. It is not the new method.
+- Experiment: seed7 30-trial baseline/RSDF/BPC = 0.21/0.25/0.19; seed13 30-trial baseline/RSDF = 0.13/0.15. BPC seed13 was stopped after seed7 rejection to release GPUs.
+- Reflection: RSDF is still the protected current best (+3 points average over baseline) but fails the +5 target. The next cycle should target relation-specific rollout-state failures without global teacher preservation.

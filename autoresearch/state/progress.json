@@ -1,26 +1,56 @@
 ﻿{
-    "iteration":  31,
-    "status":  "bpc_rsdf_confirm30_running_after_positive_screen",
+    "iteration":  32,
+    "status":  "rsdf_confirm30_complete_bpc_rejected",
     "stale_count":  0,
-    "total_findings":  40,
-    "last_update":  "2026-07-21T01:45:00+08:00",
+    "total_findings":  41,
+    "last_update":  "2026-07-21T07:30:00+08:00",
     "remote":  "cyh@59.77.7.23:/mnt/data/cyh/VLA-long-tail",
     "gpu_policy":  "use at most physical GPUs 2 and 3; never interrupt other users",
     "current_best":  {
                          "method":  "RSDF vision+LLM alpha=0.5 from baseline-1000 and BARC-p100",
                          "seed7":  {
-                                       "baseline_30trial":  0.19,
+                                       "baseline_30trial":  0.21,
                                        "method_30trial":  0.25,
-                                       "absolute_gain":  0.06
+                                       "absolute_gain":  0.04,
+                                       "method_tasks":  [
+                                                            0.5,
+                                                            0.03,
+                                                            0.33,
+                                                            0.67,
+                                                            0.33,
+                                                            0,
+                                                            0.3,
+                                                            0,
+                                                            0.3,
+                                                            0
+                                                        ]
                                    },
                          "seed13":  {
-                                        "baseline_30trial":  0.17,
-                                        "method_30trial":  0.18,
-                                        "absolute_gain":  0.01
-                                    }
+                                        "baseline_30trial":  0.13,
+                                        "method_30trial":  0.15,
+                                        "absolute_gain":  0.02,
+                                        "method_tasks":  [
+                                                             0.27,
+                                                             0.07,
+                                                             0.13,
+                                                             0.63,
+                                                             0.07,
+                                                             0,
+                                                             0.27,
+                                                             0,
+                                                             0.07,
+                                                             0.03
+                                                         ]
+                                    },
+                         "average":  {
+                                         "baseline_30trial":  0.17,
+                                         "method_30trial":  0.2,
+                                         "absolute_gain":  0.03
+                                     }
                      },
     "remaining_risk":  [
-                           "RSDF gain is not reliable across seeds: +6 on seed7 but only +1 on seed13",
+                           "BPC-RSDF 30-trial confirms that global baseline-teacher KL can make the method worse than RSDF and even baseline on seed7.",
+                           "RSDF gain remains below target: +4 on seed7 and +2 on seed13 under matched 30-trial confirm30, averaging +3 points rather than the required +5.",
                            "SPRC shows full-parameter L2 protection alone does not prevent harmful correction",
                            "extreme tail tasks 5 and 7 remain zero across both seeds",
                            "additional LT simulation dataset still pending",
@@ -38,7 +68,7 @@
                            "C-RSDF confirms that more conservative checkpoint fusion is not the fix: seed7 only +2 over fixed-init baseline and below RSDF/AHP, seed13 ties fixed-init baseline while task0 and task6 remain weak.",
                            "The next method must be based on closed-loop rollout-state error diagnosis/correction, not another parameter-fusion microvariant."
                        ],
-    "next_structural_direction":  "Run 30-trial confirmation for BPC-RSDF against matched baseline and RSDF on seed7/seed13; keep BPC only if the 30-trial result remains non-regressive and improves the averaged baseline by at least 5 points.",
+    "next_structural_direction":  "Preserve RSDF as the protected current best; design an end-to-end relation-localized rollout-state correction that does not impose global baseline-teacher KL or replay weights.",
     "negative_screens":  {
                              "SPRC":  {
                                           "seed7":  0.17,
@@ -97,7 +127,12 @@
                                       },
                              "BPC_RSDF_GPU_TEACHER_OOM":  {
                                                               "conclusion":  "loading the frozen baseline teacher on GPU replicated under two-rank FSDP caused 47GB-per-GPU OOM; CPU teacher fallback is required for this stack"
-                                                          }
+                                                          },
+                             "BPC_RSDF_confirm30":  {
+                                                        "seed7_delta_vs_baseline":  -0.02,
+                                                        "seed7_delta_vs_rsdf":  -0.06,
+                                                        "conclusion":  "30-trial confirmation rejects BPC-RSDF; baseline-teacher KL over-preserves baseline behavior and suppresses RSDF correction"
+                                                    }
                          },
     "rollout_diag_pair":  {
                               "stamp":  "20260719_173523",
@@ -190,48 +225,114 @@
                                                             }
                                             },
                                "gpu_policy":  "physical GPUs 2 and 3 only; six sequential 30-trial evals; no training",
-                               "status":  "running; baseline_seed7 eval started after GPU precheck"
+                               "status":  "completed/rejected: BPC-RSDF seed7 30-trial fell below both baseline and RSDF; BPC seed13 stopped to save GPUs",
+                               "confirm30":  {
+                                                 "seed7":  {
+                                                               "baseline":  0.21,
+                                                               "rsdf":  0.25,
+                                                               "bpc_rsdf":  0.19,
+                                                               "baseline_tasks":  [
+                                                                                      0.5,
+                                                                                      0.07,
+                                                                                      0.27,
+                                                                                      0.5,
+                                                                                      0.27,
+                                                                                      0,
+                                                                                      0.3,
+                                                                                      0,
+                                                                                      0.2,
+                                                                                      0
+                                                                                  ],
+                                                               "rsdf_tasks":  [
+                                                                                  0.5,
+                                                                                  0.03,
+                                                                                  0.33,
+                                                                                  0.67,
+                                                                                  0.33,
+                                                                                  0,
+                                                                                  0.3,
+                                                                                  0,
+                                                                                  0.3,
+                                                                                  0
+                                                                              ],
+                                                               "bpc_tasks":  [
+                                                                                 0.4,
+                                                                                 0.1,
+                                                                                 0.23,
+                                                                                 0.7,
+                                                                                 0.2,
+                                                                                 0,
+                                                                                 0.23,
+                                                                                 0,
+                                                                                 0.07,
+                                                                                 0
+                                                                             ]
+                                                           },
+                                                 "seed13":  {
+                                                                "baseline":  0.13,
+                                                                "rsdf":  0.15,
+                                                                "bpc_rsdf":  null,
+                                                                "baseline_tasks":  [
+                                                                                       0.23,
+                                                                                       0.07,
+                                                                                       0.1,
+                                                                                       0.47,
+                                                                                       0.1,
+                                                                                       0,
+                                                                                       0.3,
+                                                                                       0,
+                                                                                       0,
+                                                                                       0.07
+                                                                                   ],
+                                                                "rsdf_tasks":  [
+                                                                                   0.27,
+                                                                                   0.07,
+                                                                                   0.13,
+                                                                                   0.63,
+                                                                                   0.07,
+                                                                                   0,
+                                                                                   0.27,
+                                                                                   0,
+                                                                                   0.07,
+                                                                                   0.03
+                                                                               ],
+                                                                "note":  "BPC seed13 stopped after seed7 rejection"
+                                                            },
+                                                 "average":  {
+                                                                 "baseline":  0.17,
+                                                                 "rsdf":  0.2,
+                                                                 "rsdf_delta_vs_baseline":  0.03,
+                                                                 "conclusion":  "RSDF remains current best but does not meet +5 target; BPC rejected"
+                                                             }
+                                             }
                            },
     "last_negative_result":  {
-                                 "method":  "CRGR behavior-risk replay heldout fixed-init 10 trials/task",
+                                 "method":  "BPC-RSDF baseline-preservation KL confirm30",
                                  "seed7":  {
-                                               "baseline":  0.16,
-                                               "rsdf":  0.2,
-                                               "crgr":  0.21,
-                                               "delta_vs_baseline":  0.05,
-                                               "delta_vs_rsdf":  0.01,
-                                               "crgr_per_task":  [
-                                                                     0.5,
-                                                                     0,
-                                                                     0.3,
-                                                                     0.6,
-                                                                     0.2,
-                                                                     0,
-                                                                     0.5,
-                                                                     0,
-                                                                     0,
-                                                                     0
-                                                                 ]
+                                               "baseline":  0.21,
+                                               "rsdf":  0.25,
+                                               "bpc_rsdf":  0.19,
+                                               "delta_vs_baseline":  -0.02,
+                                               "delta_vs_rsdf":  -0.06,
+                                               "bpc_per_task":  [
+                                                                    0.4,
+                                                                    0.1,
+                                                                    0.23,
+                                                                    0.7,
+                                                                    0.2,
+                                                                    0,
+                                                                    0.23,
+                                                                    0,
+                                                                    0.07,
+                                                                    0
+                                                                ]
                                            },
                                  "seed13":  {
-                                                "baseline":  0.14,
-                                                "rsdf":  0.13,
-                                                "crgr":  0.08,
-                                                "delta_vs_baseline":  -0.06,
-                                                "delta_vs_rsdf":  -0.05,
-                                                "crgr_per_task":  [
-                                                                      0.3,
-                                                                      0,
-                                                                      0,
-                                                                      0.3,
-                                                                      0.1,
-                                                                      0,
-                                                                      0.1,
-                                                                      0,
-                                                                      0,
-                                                                      0
-                                                                  ]
+                                                "baseline":  0.13,
+                                                "rsdf":  0.15,
+                                                "bpc_rsdf":  null,
+                                                "note":  "stopped after seed7 rejection to save GPU"
                                             },
-                                 "conclusion":  "rejected: CRGR gives seed7 heldout gain but catastrophically overwrites seed13 relation/action behavior; closed-loop risk replay needs explicit baseline behavior preservation."
+                                 "conclusion":  "rejected: frozen-baseline action-token KL can over-preserve baseline behavior and suppress RSDF relation correction; RSDF remains protected current best."
                              }
 }

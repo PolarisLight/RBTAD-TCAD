@@ -45,10 +45,10 @@ We also ran a controlled LIBERO-Core-Full counterpart experiment using the same 
 | --- | --- | ---: |
 | LIBERO-Core-Full | BC baseline | 43.0% |
 | LIBERO-Core-Full | TCAD-trained | **50.0%** |
-| LIBERO-Spatial-LT | BC baseline, seed 7 matched 30 trials/task | 19.0% |
+| LIBERO-Spatial-LT | BC baseline, seed 7 matched 30 trials/task | 21.0% |
 | LIBERO-Spatial-LT | RSDF vision+LLM, seed 7 matched 30 trials/task | **25.0%** |
-| LIBERO-Spatial-LT | BC baseline, seed 13 matched 30 trials/task | 17.0% |
-| LIBERO-Spatial-LT | RSDF vision+LLM, seed 13 matched 30 trials/task | 18.0% |
+| LIBERO-Spatial-LT | BC baseline, seed 13 matched 30 trials/task | 13.0% |
+| LIBERO-Spatial-LT | RSDF vision+LLM, seed 13 matched 30 trials/task | 15.0% |
 
 The task-level analysis below shows that the Core-Full gain is not a uniform lift across all tasks. Improvements concentrate in lower-baseline tasks and in tasks 4-10, which supports the view that TCAD helps sharpen difficult task-conditioned action boundaries.
 
@@ -62,12 +62,12 @@ The current best Spatial-LT method is **Relation-Localized Delta Fusion (RSDF)**
 
 | Dataset | Seed | Method | Trials/task | Success rate |
 | --- | ---: | --- | ---: | ---: |
-| LIBERO-Spatial-LT | 7 | BC baseline | 30 | 19.0% |
+| LIBERO-Spatial-LT | 7 | BC baseline | 30 | 21.0% |
 | LIBERO-Spatial-LT | 7 | RSDF vision+LLM | 30 | **25.0%** |
-| LIBERO-Spatial-LT | 13 | BC baseline | 30 | 17.0% |
-| LIBERO-Spatial-LT | 13 | RSDF vision+LLM | 30 | 18.0% |
+| LIBERO-Spatial-LT | 13 | BC baseline | 30 | 13.0% |
+| LIBERO-Spatial-LT | 13 | RSDF vision+LLM | 30 | 15.0% |
 
-Task-level Spatial-LT seed 7 result: baseline `[.50, .00, .20, .47, .17, .00, .40, .00, .17, .00]`; RSDF `[.63, .07, .27, .57, .37, .00, .27, .00, .30, .00]`. Seed 13 result: baseline `[.33, .17, .07, .53, .10, .00, .37, .00, .07, .03]`; RSDF `[.13, .27, .17, .70, .13, .00, .30, .00, .07, .00]`. RSDF therefore gives a strong seed 7 screening gain (+6 points) but only +1 point on seed 13, so it remains a useful signal rather than a reliable finished method.
+Task-level Spatial-LT confirm30 result: seed 7 baseline `[.50, .07, .27, .50, .27, .00, .30, .00, .20, .00]`; seed 7 RSDF `[.50, .03, .33, .67, .33, .00, .30, .00, .30, .00]`. Seed 13 baseline `[.23, .07, .10, .47, .10, .00, .30, .00, .00, .07]`; seed 13 RSDF `[.27, .07, .13, .63, .07, .00, .27, .00, .07, .03]`. RSDF gives a two-seed 30-trial average of 20.0% versus 17.0% for baseline, so it remains a useful signal rather than a reliable finished method.
 
 
 ### Spatial-LT Follow-up Screens
@@ -114,11 +114,11 @@ This explains why the original RSDF direction had signal but later fusion varian
 CRGR (Closed-loop Risk-Gated Replay) keeps RSDF as the protected current best, then runs a short end-to-end weighted BC recovery pass from the RSDF checkpoint. The weights are computed from paired rollout behavior shifts only: longer rollouts, lower mean action norm, or large gripper-close timing shifts increase replay weight. Success labels are not used to build the weights, and inference remains unchanged.
 
 Heldout fixed-init screen, init ids 5..14, 10 trials/task: seed 7 baseline 16.0%, RSDF 20.0%, CRGR 21.0%; seed 13 baseline 14.0%, RSDF 13.0%, CRGR 8.0%. CRGR is therefore rejected as a final method. It gives the desired seed7 recovery but damages seed13 much more, showing that unprotected risk replay can overwrite baseline relation/action behavior. The next branch should add explicit baseline behavior preservation rather than another replay-weight variant.
-### BPC-RSDF Active Screen
+### BPC-RSDF Rejected Screen
 
-BPC-RSDF (Baseline-Preserved Correction from RSDF) is the current active branch after rejecting CRGR. It initializes from the seed-matched RSDF checkpoint and adds an action-token KL term from the seed-matched baseline-1000 teacher only on manifest-protected instructions. Closed-loop risk controls `bp_weight` and `tcad_enable`; it no longer upweights BC replay. The first GPU-teacher attempt OOMed under two-rank FSDP, so the active screen uses a CPU frozen teacher and keeps the RSDF student on physical GPUs 2/3.
+BPC-RSDF (Baseline-Preserved Correction from RSDF) was tested after rejecting CRGR. It initializes from the seed-matched RSDF checkpoint and adds an action-token KL term from the seed-matched baseline-1000 teacher only on manifest-protected instructions. Closed-loop risk controls `bp_weight` and `tcad_enable`; it no longer upweights BC replay. The first GPU-teacher attempt OOMed under two-rank FSDP, so the active screen uses a CPU frozen teacher and keeps the RSDF student on physical GPUs 2/3.
 
-Server23 run `20260719_223327` has passed both seed7 and seed13 5-step smokes: `bp_count > 0`, finite `bp_loss`, `mean_sample_weight = 1.0`, and at least one TCAD active row. The 10-trial heldout screen passed the non-regression gate: seed7 baseline/RSDF/BPC = 16.0%/20.0%/24.0%, and seed13 = 14.0%/13.0%/19.0%. The average gain over the matched baseline is +6.5 points. A six-way 30-trial confirmation is now running on server23 (`/mnt/data/cyh/spatial_lt_bpc_rsdf_confirm30_20260721_014019.log`) before treating this as a final method claim.
+Server23 run `20260719_223327` has passed both seed7 and seed13 5-step smokes: `bp_count > 0`, finite `bp_loss`, `mean_sample_weight = 1.0`, and at least one TCAD active row. The 10-trial heldout screen passed the non-regression gate: seed7 baseline/RSDF/BPC = 16.0%/20.0%/24.0%, and seed13 = 14.0%/13.0%/19.0%. The average gain over the matched baseline is +6.5 points. The six-way 30-trial confirmation rejected BPC-RSDF: seed 7 baseline/RSDF/BPC-RSDF was 21.0%/25.0%/19.0%, and seed 13 baseline/RSDF was 13.0%/15.0%. BPC seed13 was stopped after the seed7 rejection. The result shows that frozen-baseline KL over-preserves baseline behavior and can suppress the useful RSDF correction.
 ## Per-Task LIBERO-Core-LT Results
 
 These are local 30-rollout-per-task numbers. The local BC row is a reproduced checkpoint evaluation, not the three-seed number reported in the original APA paper.
@@ -147,6 +147,6 @@ latexmk -pdf -interaction=nonstopmode main.tex
 
 ## Claim Boundary
 
-RBTAD/TCAD remains the Core-LT training-objective branch. For Spatial-LT, RSDF vision+LLM is the current best diagnostic direction, but seed 13 reduces the gain from +6 points to +1 point.
+RBTAD/TCAD remains the Core-LT training-objective branch. For Spatial-LT, RSDF vision+LLM is the current best diagnostic direction, with a two-seed confirm30 average of 20.0% versus 17.0% for the matched baseline. BPC-RSDF is rejected after dropping seed7 to 19.0%.
 
 The current result should not be described as a final SOTA result until a revised method delivers a consistent multi-seed gain, stronger protocol matching, and at least one additional simulated long-tail split. The repository intentionally excludes local transfer archives, generated environments, LaTeX build products, APA reference files, and large raster exports.
