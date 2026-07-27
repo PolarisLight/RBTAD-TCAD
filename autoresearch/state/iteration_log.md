@@ -67,3 +67,67 @@ This is the first candidate after RSDF that improves both seeds in the fixed hel
 - Method outcome: BPC-RSDF remains a diagnostic implementation branch only. It is not the new method.
 - Experiment: seed7 30-trial baseline/RSDF/BPC = 0.21/0.25/0.19; seed13 30-trial baseline/RSDF = 0.13/0.15. BPC seed13 was stopped after seed7 rejection to release GPUs.
 - Reflection: RSDF is still the protected current best (+3 points average over baseline) but fails the +5 target. The next cycle should target relation-specific rollout-state failures without global teacher preservation.
+
+## Iteration 33 - GPRC gripper-phase relation contrast
+
+Theory:
+Red-team audit rejects another global preservation/replay or checkpoint-fusion variant. The remaining plausible failure mode is relation-conditioned phase timing: Spatial-LT keeps the manipulated object and goal nearly fixed, so source-relation errors must eventually surface in the gripper/close phase rather than in a broad action-token distribution. GPRC therefore avoids baseline-teacher KL, replay weights, and inference-time modules.
+
+Method:
+GPRC is standard BC plus a relation-neighbor TCAD margin computed only on the last valid action token (`tcad_token_scope=last_action`). Spatial-LT negatives are true in-dataset relation neighbors, not hash-random task instructions. The active screen starts from matched baseline-1000 checkpoints, uses `tcad_lambda=0.05`, `tcad_margin=0.10`, `tcad_tail_max_count=15`, `tcad_ratio=0.5`, and keeps `mean_sample_weight=1.0` / `bp_count=0`.
+
+Experiment:
+The first 20260721_075243 smoke was rejected because TCAD active_count stayed at zero. The fixed 20260721_075908 run uses ratio=1.0 only for 5-step smoke. Both smokes pass: seed7 has sum_candidate=6 and sum_active=6; seed13 has sum_candidate=7 and sum_active=7; both have `tcad_token_scope=last_action`, `mean_tcad_tokens=1.0`, `bp_count=0`, and `mean_sample_weight=1.0`. The 100-step matched screen is running on physical GPUs 2/3 only. Log: `/mnt/data/cyh/spatial_lt_gprc_screen_20260721_075908.log`.
+
+Reflection:
+The inactive first smoke prevented a false positive. GPRC remains a candidate, not a result. A 10-trial screen can only decide whether to launch 30-trial confirmation; final success still requires >=22.0% two-seed 30-trial average and no single-seed baseline regression.
+
+## Iteration 34 - GPRC rejected; DP-GPRC next
+
+Theory:
+GPRC validates the gripper-phase relation signal on seed7 but fails the cross-seed stability test. The failure pattern is not global collapse: seed13 improves T4 from 0.00 baseline / 0.10 RSDF to 0.30, but damages T3 from 0.50/0.60 to 0.20 and T6 from 0.30/0.40 to 0.20. This suggests the direct positive-branch last-action margin over-corrects already-competent relation-phase behavior.
+
+Method:
+Reject direct GPRC as final. The next minimal candidate is DP-GPRC: keep true relation-neighbor negatives and last-action token scope, but set `tcad_detach_positive=True` so the margin mainly suppresses the wrong-instruction branch. It does not add replay weights, teacher KL, checkpoint fusion, or inference-time machinery.
+
+Experiment:
+GPRC 10-trial fixed-init screen completed on GPUs 2/3. Seed7 baseline/RSDF/GPRC = 0.16/0.20/0.26. Seed13 baseline/RSDF/GPRC = 0.14/0.13/0.09. Since seed13 regresses below the matched baseline, no 30-trial confirm is launched for direct GPRC.
+
+Reflection:
+The useful signal is phase-local, but the loss must avoid pushing the correct behavior branch directly. DP-GPRC is a structural response to the observed failure, not a broad hyperparameter sweep.
+
+## 2026-07-28 Core-LT reviewer-priority reset
+
+Theory:
+The project state must stop treating Spatial-LT GPRC/DP-GPRC as the protected main path. The reviewer-priority closure is now Core-LT RBTAD-TCAD: same-pipeline APA reproduction, 2x2 ablation, multi-seed confirmation, APA+RBTAD complementarity, and margin-success diagnostics. Spatial-LT remains appendix/failure-boundary evidence.
+
+Method:
+P1/P2 execution is serialized on server23 physical GPU 2/3 only. Rare-BC seed7 completes the missing 2x2 ablation cell. APA is rebuilt from complete raw LIBERO Object/Goal files, not from partial no-noops or TFDS-only reconstructions.
+
+Experiment:
+Raw LIBERO-Object and LIBERO-Goal files are complete at 10/10 each. The old partial APA regeneration was stopped and moved aside. Robust APA queue is patched with `wait_for_rarebc_done` and is now gated before any GPU/no-noops/TFDS/training work. Rare-BC seed7 is alive on GPU 2/3.
+
+Reflection:
+The current evidence loop is not finished. Do not claim completion or update main-paper SOTA tables until same-pipeline APA and Rare-BC results are parsed. The protected main result remains seed7 Core-LT RBTAD about 40% versus local BC about 24%, with APA comparison pending.
+
+## 2026-07-28 04:40 Core-LT Reviewer Priority Queue Persisted
+
+- Rare-BC seed7 is alive on server23 physical GPU 2/3, latest observed step about 3029/34074.
+- Robust full-raw APA remains gated behind Rare-BC; local reproducibility script persisted as `code/run_core_all_hf_download_then_apa_seed7_23.sh`.
+- Post-APA priority queue persisted as `code/run_core_lt_priority_after_apa_multiseed_23.sh` and is waiting behind Rare-BC + APA.
+- The post-APA queue order is matched Core-LT BC seed7, BC/RBTAD seed13, and BC/RBTAD seed21, all with 30 trials/task evaluation and physical GPU 2/3 only.
+
+## 2026-07-28 04:45 Evidence Summarizer Added
+
+- Added `code/summarize_core_lt_priority_results.py` to parse LIBERO `000.log` files into unified JSON/Markdown evidence summaries.
+- Remote run generated:
+  - `/mnt/data/cyh/VLA-long-tail/autoresearch/state/core_lt_priority_summary.json`
+  - `/mnt/data/cyh/VLA-long-tail/autoresearch/state/core_lt_priority_summary.md`
+- Local copies are stored at:
+  - `autoresearch/state/core_lt_priority_summary.json`
+  - `autoresearch/state/core_lt_priority_summary.md`
+- Current parsed evidence:
+  - legacy Core-LT BC seed7: 0.24;
+  - TCAD-only/RCTAD seed7: 0.35;
+  - RBTAD-TCAD seed7: 0.40;
+  - matched BC seed7, Rare-BC seed7, APA seed7, seed13/21 BC/RBTAD remain pending because no matching `000.log` exists yet.

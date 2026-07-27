@@ -1,0 +1,267 @@
+{
+  "root": "/mnt/data/cyh/VLA-long-tail",
+  "entries": {
+    "bc_seed7_legacy": {
+      "target": {
+        "key": "bc_seed7_legacy",
+        "label": "BC seed7 legacy local",
+        "group": "main_seed7",
+        "seed": 7,
+        "role": "bc",
+        "patterns": [
+          "results/miniVLA_libero_core_lt/*x7*/17038/*30trials*/*/step_17038-vqa_False/000.log"
+        ],
+        "note": "Existing local BC evidence; not the strict two-GPU matched BC cell."
+      },
+      "status": "done",
+      "log_path": "/mnt/data/cyh/VLA-long-tail/results/miniVLA_libero_core_lt/prism-qwen25-dinosiglip-224px+0_5b+mx-libero-core-lt+n0+b10+x7/17038/baseline_lt_step17038_30trials_egl_20260607_132054/libero_core-prismatic/step_17038-vqa_False/000.log",
+      "overall": 0.24,
+      "per_task": [
+        0.63,
+        0.37,
+        0.23,
+        0.4,
+        0.43,
+        0.23,
+        0.0,
+        0.07,
+        0.03,
+        0.0
+      ],
+      "num_tasks": 10,
+      "note": "Existing local BC evidence; not the strict two-GPU matched BC cell."
+    },
+    "matched_bc_seed7": {
+      "target": {
+        "key": "matched_bc_seed7",
+        "label": "BC seed7 matched two-GPU",
+        "group": "2x2_seed7",
+        "seed": 7,
+        "role": "bc",
+        "patterns": [
+          "results/core_lt_ablation/matchedbc_libero_core_lt_seed7_b20/*/*30trials*/*/step_*-vqa_False/000.log"
+        ],
+        "note": ""
+      },
+      "status": "pending",
+      "log_path": null,
+      "overall": null,
+      "per_task": null,
+      "num_tasks": null,
+      "note": ""
+    },
+    "tcad_only_seed7": {
+      "target": {
+        "key": "tcad_only_seed7",
+        "label": "TCAD-only seed7",
+        "group": "2x2_seed7",
+        "seed": 7,
+        "role": "tcad_only",
+        "patterns": [
+          "results/rctad_lt_main/rctad_tail9_confmedian_ratio05_seed7_b20/034075/*30trials*/*/step_34075-vqa_False/000.log",
+          "results/tcad_final_lt_main/tcad_final_maskpos_ratio025_seed7_b20/34075/*30trials*/*/step_34075-vqa_False/000.log"
+        ],
+        "note": "Prefer RCTAD ratio=0.5 when present; tcad_final ratio=0.25 kept as legacy diagnostic."
+      },
+      "status": "done",
+      "log_path": "/mnt/data/cyh/VLA-long-tail/results/rctad_lt_main/rctad_tail9_confmedian_ratio05_seed7_b20/034075/rctad_step034075_30trials_egl_20260609_052111/libero_core-prismatic/step_34075-vqa_False/000.log",
+      "overall": 0.35,
+      "per_task": [
+        0.47,
+        0.7,
+        0.7,
+        0.6,
+        0.33,
+        0.33,
+        0.07,
+        0.0,
+        0.27,
+        0.03
+      ],
+      "num_tasks": 10,
+      "note": "Prefer RCTAD ratio=0.5 when present; tcad_final ratio=0.25 kept as legacy diagnostic."
+    },
+    "rarebc_seed7": {
+      "target": {
+        "key": "rarebc_seed7",
+        "label": "Rare-BC seed7",
+        "group": "2x2_seed7",
+        "seed": 7,
+        "role": "rare_bc",
+        "patterns": [
+          "results/core_lt_ablation/rarebc_libero_core_lt_w3_tail9_seed7_b20/*/*30trials*/*/step_*-vqa_False/000.log"
+        ],
+        "note": ""
+      },
+      "status": "pending",
+      "log_path": null,
+      "overall": null,
+      "per_task": null,
+      "num_tasks": null,
+      "note": ""
+    },
+    "rbtad_seed7": {
+      "target": {
+        "key": "rbtad_seed7",
+        "label": "RBTAD-TCAD seed7",
+        "group": "main_seed7",
+        "seed": 7,
+        "role": "rbtad",
+        "patterns": [
+          "results/rbtad_lt_main/rbtad_w3_tail9_confmedian_seed7_b20/034075/*30trials*/*/step_34075-vqa_False/000.log"
+        ],
+        "note": ""
+      },
+      "status": "done",
+      "log_path": "/mnt/data/cyh/VLA-long-tail/results/rbtad_lt_main/rbtad_w3_tail9_confmedian_seed7_b20/034075/rbtad_step034075_30trials_egl_20260610_014339/libero_core-prismatic/step_34075-vqa_False/000.log",
+      "overall": 0.4,
+      "per_task": [
+        0.6,
+        0.53,
+        0.43,
+        0.57,
+        0.5,
+        0.3,
+        0.6,
+        0.13,
+        0.37,
+        0.0
+      ],
+      "num_tasks": 10,
+      "note": ""
+    },
+    "apa_seed7": {
+      "target": {
+        "key": "apa_seed7",
+        "label": "APA seed7 same pipeline",
+        "group": "apa",
+        "seed": 7,
+        "role": "apa",
+        "patterns": [
+          "results/core_lt_priority/apa_libero_core_apa_seed7_b20/*/*30trials*/*/step_*-vqa_False/000.log",
+          "results/core_lt_priority/*apa*seed7*/*/*30trials*/*/step_*-vqa_False/000.log"
+        ],
+        "note": ""
+      },
+      "status": "pending",
+      "log_path": null,
+      "overall": null,
+      "per_task": null,
+      "num_tasks": null,
+      "note": ""
+    },
+    "bc_seed13": {
+      "target": {
+        "key": "bc_seed13",
+        "label": "BC seed13",
+        "group": "multiseed",
+        "seed": 13,
+        "role": "bc",
+        "patterns": [
+          "results/core_lt_multiseed/baseline_libero_core_lt_seed13_b20/*/*30trials*/*/step_*-vqa_False/000.log"
+        ],
+        "note": ""
+      },
+      "status": "pending",
+      "log_path": null,
+      "overall": null,
+      "per_task": null,
+      "num_tasks": null,
+      "note": ""
+    },
+    "rbtad_seed13": {
+      "target": {
+        "key": "rbtad_seed13",
+        "label": "RBTAD-TCAD seed13",
+        "group": "multiseed",
+        "seed": 13,
+        "role": "rbtad",
+        "patterns": [
+          "results/core_lt_multiseed/rbtad_libero_core_lt_w3_tail9_confmedian_seed13_b20/*/*30trials*/*/step_*-vqa_False/000.log"
+        ],
+        "note": ""
+      },
+      "status": "pending",
+      "log_path": null,
+      "overall": null,
+      "per_task": null,
+      "num_tasks": null,
+      "note": ""
+    },
+    "bc_seed21": {
+      "target": {
+        "key": "bc_seed21",
+        "label": "BC seed21",
+        "group": "multiseed",
+        "seed": 21,
+        "role": "bc",
+        "patterns": [
+          "results/core_lt_multiseed/baseline_libero_core_lt_seed21_b20/*/*30trials*/*/step_*-vqa_False/000.log"
+        ],
+        "note": ""
+      },
+      "status": "pending",
+      "log_path": null,
+      "overall": null,
+      "per_task": null,
+      "num_tasks": null,
+      "note": ""
+    },
+    "rbtad_seed21": {
+      "target": {
+        "key": "rbtad_seed21",
+        "label": "RBTAD-TCAD seed21",
+        "group": "multiseed",
+        "seed": 21,
+        "role": "rbtad",
+        "patterns": [
+          "results/core_lt_multiseed/rbtad_libero_core_lt_w3_tail9_confmedian_seed21_b20/*/*30trials*/*/step_*-vqa_False/000.log"
+        ],
+        "note": ""
+      },
+      "status": "pending",
+      "log_path": null,
+      "overall": null,
+      "per_task": null,
+      "num_tasks": null,
+      "note": ""
+    }
+  },
+  "seed7_current_gain_vs_legacy_bc": 0.16,
+  "seed7_current_gain_vs_matched_bc": null,
+  "multiseed_pairs": [
+    {
+      "seed": 7,
+      "bc_key": "bc_seed7_legacy",
+      "rbtad_key": "rbtad_seed7",
+      "bc": 0.24,
+      "rbtad": 0.4,
+      "delta": 0.16,
+      "status": "done"
+    },
+    {
+      "seed": 13,
+      "bc_key": "bc_seed13",
+      "rbtad_key": "rbtad_seed13",
+      "bc": null,
+      "rbtad": null,
+      "delta": null,
+      "status": "pending"
+    },
+    {
+      "seed": 21,
+      "bc_key": "bc_seed21",
+      "rbtad_key": "rbtad_seed21",
+      "bc": null,
+      "rbtad": null,
+      "delta": null,
+      "status": "pending"
+    }
+  ],
+  "multiseed_done_average": {
+    "bc": 0.24,
+    "rbtad": 0.4,
+    "delta": 0.16,
+    "n": 1
+  }
+}
