@@ -10,9 +10,9 @@ OUT_DIR="$ROOT/autoresearch/state/margin_diagnostics"
 log() { echo "[$(date -Is)] $*"; }
 
 wait_front_and_priority_done() {
-  log "waiting for Rare-BC, APA, and post-APA priority queues to finish"
-  while pgrep -af 'run_core_lt_rarebc_seed7_23.sh|rarebc_libero_core_lt_w3_tail9_seed7_b20|run_core_all_hf_download_then_apa_seed7_23.sh|core_all_hf_apa_seed7|run_core_lt_priority_after_apa_multiseed_23.sh' >/dev/null; do
-    pgrep -af 'run_core_lt_rarebc_seed7_23.sh|rarebc_libero_core_lt_w3_tail9_seed7_b20|run_core_all_hf_download_then_apa_seed7_23.sh|core_all_hf_apa_seed7|run_core_lt_priority_after_apa_multiseed_23.sh' || true
+  log "waiting for Rare-BC, APA, post-APA priority, and APA+RBTAD queues to finish"
+  while pgrep -af 'run_core_lt_rarebc_seed7_23.sh|rarebc_libero_core_lt_w3_tail9_seed7_b20|run_core_all_hf_download_then_apa_seed7_23.sh|core_all_hf_apa_seed7|run_core_lt_priority_after_apa_multiseed_23.sh|run_core_lt_apa_rbtad_after_priority_23.sh|apa_rbtad_libero_core_apa_w3_tail9_confmedian_seed7_b20' >/dev/null; do
+    pgrep -af 'run_core_lt_rarebc_seed7_23.sh|rarebc_libero_core_lt_w3_tail9_seed7_b20|run_core_all_hf_download_then_apa_seed7_23.sh|core_all_hf_apa_seed7|run_core_lt_priority_after_apa_multiseed_23.sh|run_core_lt_apa_rbtad_after_priority_23.sh|apa_rbtad_libero_core_apa_w3_tail9_confmedian_seed7_b20' || true
     sleep 1800
   done
 }
@@ -92,6 +92,7 @@ add_model_arg_if_ckpt() {
   add_model_arg_if_ckpt bc_seed21 "$ROOT/runs/core_lt_multiseed/baseline_libero_core_lt_seed21_b20"
   add_model_arg_if_ckpt rbtad_seed21 "$ROOT/runs/core_lt_multiseed/rbtad_libero_core_lt_w3_tail9_confmedian_seed21_b20"
   add_model_arg_if_ckpt apa_seed7 "$ROOT/runs/core_lt_priority/apa_libero_core_apa_seed7_b20"
+  add_model_arg_if_ckpt apa_rbtad_seed7 "$ROOT/runs/core_lt_complementarity/apa_rbtad_libero_core_apa_w3_tail9_confmedian_seed7_b20"
 
   if [[ ${#MODEL_ARGS[@]} -lt 4 ]]; then
     log "not enough checkpoints for margin diagnostic; args=${MODEL_ARGS[*]:-<none>}"
