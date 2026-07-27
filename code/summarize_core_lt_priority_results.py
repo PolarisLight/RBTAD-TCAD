@@ -100,6 +100,16 @@ TARGETS: tuple[Target, ...] = (
         ),
     ),
     Target(
+        key="apa_rbtad_seed7",
+        label="APA+RBTAD seed7 same pipeline",
+        group="complementarity",
+        seed=7,
+        role="apa_rbtad",
+        patterns=(
+            "results/core_lt_complementarity/apa_rbtad_libero_core_apa_w3_tail9_confmedian_seed7_b20/*/*30trials*/*/step_*-vqa_False/000.log",
+        ),
+    ),
+    Target(
         key="bc_seed13",
         label="BC seed13",
         group="multiseed",
@@ -259,7 +269,7 @@ def to_markdown(summary: dict) -> str:
     lines.append("## Seed7 Main / 2x2")
     lines.append("| Cell | Overall | Per-task | Log |")
     lines.append("| --- | ---: | --- | --- |")
-    for key in ("bc_seed7_legacy", "matched_bc_seed7", "tcad_only_seed7", "rarebc_seed7", "rbtad_seed7", "apa_seed7"):
+    for key in ("bc_seed7_legacy", "matched_bc_seed7", "tcad_only_seed7", "rarebc_seed7", "rbtad_seed7", "apa_seed7", "apa_rbtad_seed7"):
         e = entries[key]
         per_task = "pending" if e["per_task"] is None else ", ".join(f"{x:.2f}" for x in e["per_task"])
         log = e["log_path"] or "pending"
@@ -280,6 +290,7 @@ def to_markdown(summary: dict) -> str:
     lines.append("## Notes")
     lines.append("- `pending` means no matching `000.log` has been produced yet.")
     lines.append("- The strict 2x2 table should prefer matched two-GPU BC when available; legacy BC is retained to protect continuity with the current draft result.")
+    lines.append("- APA+RBTAD is the complementarity test: it should be compared against both same-pipeline APA and RBTAD-TCAD, not only against BC.")
     return "\n".join(lines) + "\n"
 
 
