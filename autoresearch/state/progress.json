@@ -3,7 +3,7 @@
   "status": "core_lt_reviewer_priority_running",
   "stale_count": 0,
   "total_findings": 41,
-  "last_update": "2026-07-28T04:45:30+08:00",
+  "last_update": "2026-07-28T04:59:30+08:00",
   "remote": "cyh@59.77.7.23:/mnt/data/cyh/VLA-long-tail",
   "gpu_policy": "use at most physical GPUs 2 and 3; never interrupt other users",
   "current_best": {
@@ -270,6 +270,15 @@
         "bc/rbtad_seed13",
         "bc/rbtad_seed21"
       ]
+    },
+    "margin_diagnostic": {
+      "script": "code/diagnose_core_lt_margins.py",
+      "wrapper": "code/run_core_lt_margin_diag_after_priority_23.sh",
+      "remote_wrapper": "/mnt/data/cyh/run_core_lt_margin_diag_after_priority_23.sh",
+      "remote_log": "/mnt/data/cyh/core_lt_margin_diag_after_priority_20260728.log",
+      "pid": 2903299,
+      "state": "waiting_for_rarebc_apa_and_post_apa_priority_queue_then_gpu2_idle",
+      "gpu_policy": "single physical GPU 2 only after all priority jobs finish"
     }
   },
   "last_negative_result": {

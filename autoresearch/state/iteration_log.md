@@ -131,3 +131,13 @@ The current evidence loop is not finished. Do not claim completion or update mai
   - TCAD-only/RCTAD seed7: 0.35;
   - RBTAD-TCAD seed7: 0.40;
   - matched BC seed7, Rare-BC seed7, APA seed7, seed13/21 BC/RBTAD remain pending because no matching `000.log` exists yet.
+
+## 2026-07-28 04:59 Margin Diagnostic Queue Added
+
+- Added `code/diagnose_core_lt_margins.py`, an offline Core-LT diagnostic that samples TCAD-eligible tail transitions, computes `log p(action|correct instruction) - log p(action|negative instruction)`, and correlates per-task margin deltas with per-task success deltas from `core_lt_priority_summary.json`.
+- Added `code/run_core_lt_margin_diag_after_priority_23.sh`, a deferred server23 watcher that waits for Rare-BC, APA, and the post-APA multiseed queue to finish, then waits for physical GPU 2 to be idle and runs the diagnostic on a single allowed GPU.
+- Remote watcher is alive and waiting:
+  - process: 2903299;
+  - script: `/mnt/data/cyh/run_core_lt_margin_diag_after_priority_23.sh`;
+  - log: `/mnt/data/cyh/core_lt_margin_diag_after_priority_20260728.log`.
+- The first launch exposed CRLF line ending fragility; local margin scripts were normalized to LF and `.gitattributes` now pins `*.sh text eol=lf`.
