@@ -44,10 +44,10 @@ On \liberocorelt{}, RBTAD reaches 40.0\%. Table~\ref{tab:main} places this resul
       & 7 & TCAD-trained & \textbf{50.0\%} \\
     \midrule
     \multirow{4}{*}{\liberospatiallt{}}
-      & 7 & BC baseline & 19.0\% \\
+      & 7 & BC baseline & 21.0\% \\
       & 7 & RSDF vision+LLM & \textbf{25.0\%} \\
-      & 13 & BC baseline & 17.0\% \\
-      & 13 & RSDF vision+LLM & 18.0\% \\
+      & 13 & BC baseline & 13.0\% \\
+      & 13 & RSDF vision+LLM & 15.0\% \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -60,7 +60,7 @@ On \liberocorelt{}, RBTAD reaches 40.0\%. Table~\ref{tab:main} places this resul
 \end{figure}
 
 
-The \liberospatiallt{} result in Table~\ref{tab:controlled_full} is intentionally reported as a screening result rather than folded into the main \liberocorelt{} claim. Full-run RBTAD and replay-style balancing were brittle on this split because all tasks share the black bowl and the final plate, so the useful signal is concentrated in the source spatial relation. We therefore tested Relation-Localized Delta Fusion (RSDF): first obtain a short baseline-anchored relation-correction checkpoint, then fuse only the \texttt{vision\_backbone} and \texttt{llm\_backbone} deltas into the baseline while keeping the projector fixed. RSDF adds no inference-time module and does not alter the model architecture. Under matched 30-rollout-per-task evaluation, seed 7 shows a 6-point absolute gain, from 19.0\% to 25.0\%. However, seed 13 gives only a 1-point gain, from 17.0\% to 18.0\%. We therefore treat RSDF as a useful diagnostic direction rather than a reliable final method.
+The \liberospatiallt{} result in Table~\ref{tab:controlled_full} is intentionally reported as a screening result rather than folded into the main \liberocorelt{} claim. Full-run RBTAD and replay-style balancing were brittle on this split because all tasks share the black bowl and the final plate, so the useful signal is concentrated in the source spatial relation. We therefore tested Relation-Localized Delta Fusion (RSDF): first obtain a short baseline-anchored relation-correction checkpoint, then fuse only the \texttt{vision\_backbone} and \texttt{llm\_backbone} deltas into the baseline while keeping the projector fixed. RSDF adds no inference-time module and does not alter the model architecture. Under matched 30-rollout-per-task evaluation, seed 7 shows a 4-point absolute gain, from 21.0\% to 25.0\%. However, seed 13 gives only a 2-point gain, from 13.0\% to 15.0\%. We therefore treat RSDF as a useful diagnostic direction rather than a reliable final method.
 
 The \liberocorefull{} controlled comparison in Table~\ref{tab:controlled_full} and Figure~\ref{fig:corefull_control} gives a cleaner within-pipeline signal. Using the same seed and evaluation budget, the baseline reaches 43.0\%, while the TCAD-trained policy reaches 50.0\%. This suggests that the action-discrimination objective is not only exploiting the exact long-tail split; it can also help difficult task-conditioned action boundaries in the full counterpart dataset.
 
@@ -85,3 +85,4 @@ The per-task results show a mixed but informative pattern. On \liberocorelt{}, R
 \subsection{Implementation Details}
 
 We fine-tune miniVLA-style checkpoints using the same model architecture and inference pathway as the baseline. RBTAD uses two GPUs during training and evaluation in our screening runs, avoiding four-GPU saturation. The \liberocorelt{} RBTAD configuration uses $\lambda=0.1$, $\rho=0.5$, margin $m=0.2$, rare threshold $\tau=9$, and rare BC weight $w_{\mathrm{rare}}=3.0$. The \liberocorefull{} TCAD run disables rare weighting and applies the TCAD signal more broadly, because the split is not long-tailed.
+

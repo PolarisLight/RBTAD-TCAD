@@ -11,14 +11,15 @@ The controlled \liberocorefull{} baseline result uses evaluation directory
 The TCAD-trained \liberocorefull{} result uses
 \path{results/core_full_protocol/rbtad_libero_core_full_alltcad_protocol_seed7_b20/101071/rbtad_libero_core_full_50trials_egl_20260617_003121}.
 
-The matched \liberospatiallt{} baseline result uses
-\path{results/spatial_lt_confirm30/baseline_libero_spatial_lt_s1000_seed7_b20/step1000/baseline_libero_spatial_lt_s1000_seed7_b20_libero_spatial_30trials_egl_20260718_163015}.
-The seed 7 RSDF vision+LLM result uses
-\path{results/spatial_lt_confirm30/rsdf_visionllm_barc100_a0p5/step100/rsdf_visionllm_barc100_a0p5_libero_spatial_30trials_egl_20260718_144932}.
-The seed 13 confirmation uses
-\path{results/spatial_lt_multiseed_confirm30/rsdf_visionllm_barc100_seed13_a0p5_20260718_185539/step100/rsdf_visionllm_barc100_seed13_a0p5_20260718_185539_libero_spatial_30trials_egl_20260718_214241}
-and
-\path{results/spatial_lt_multiseed_confirm30/baseline_libero_spatial_lt_s1000_seed13_b20_20260718_185539/step1000/baseline_libero_spatial_lt_s1000_seed13_b20_20260718_185539_libero_spatial_30trials_egl_20260718_231752}.
+The matched \liberospatiallt{} confirm30 results use the later six-way confirmation directories:
+seed 7 baseline,
+\path{results/spatial_lt_bpc_rsdf_confirm30/baseline_seed7/step1000/baseline_seed7_libero_spatial_30trials_egl_20260721_014019};
+seed 7 RSDF vision+LLM,
+\path{results/spatial_lt_bpc_rsdf_confirm30/rsdf_seed7/step100/rsdf_seed7_libero_spatial_30trials_egl_20260721_014019};
+seed 13 baseline,
+\path{results/spatial_lt_bpc_rsdf_confirm30/baseline_seed13/step1000/baseline_seed13_libero_spatial_30trials_egl_20260721_014019};
+and seed 13 RSDF vision+LLM,
+\path{results/spatial_lt_bpc_rsdf_confirm30/rsdf_seed13/step100/rsdf_seed13_libero_spatial_30trials_egl_20260721_014019}.
 
 \paragraph{Experiments to finish before a stronger arXiv revision.}
 We prioritize the remaining evidence by reviewer risk rather than by ease of implementation:
@@ -30,3 +31,4 @@ We prioritize the remaining evidence by reviewer risk rather than by ease of imp
   \item Close the margin diagnostic loop by measuring pre/post instruction-action margins for BC, TCAD-only, Rare-BC, RBTAD, APA, and APA+RBTAD, then correlating per-task margin repair with closed-loop success gains.
   \item Keep \liberospatiallt{} as an appendix/failure-boundary branch unless a reliable multi-seed method emerges; the current RSDF evidence is not strong enough to serve as a second main result.
 \end{itemize}
+
