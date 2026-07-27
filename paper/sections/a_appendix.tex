@@ -21,9 +21,12 @@ and
 \path{results/spatial_lt_multiseed_confirm30/baseline_libero_spatial_lt_s1000_seed13_b20_20260718_185539/step1000/baseline_libero_spatial_lt_s1000_seed13_b20_20260718_185539_libero_spatial_30trials_egl_20260718_231752}.
 
 \paragraph{Experiments to finish before a stronger arXiv revision.}
+We prioritize the remaining evidence by reviewer risk rather than by ease of implementation:
 \begin{itemize}[leftmargin=*]
-  \item Re-run or verify the \liberocorelt{} BC baseline under the exact same local evaluation pipeline as RBTAD.
-  \item Add at least two more seeds for RBTAD on \liberocorelt{}.
-  \item Add at least one more simulated long-tail split beyond \liberospatiallt{} to test whether RSDF generalizes beyond relation-only Spatial tasks.
-  \item Revise the \liberospatiallt{} method to close the seed 13 reliability gap; the current two-seed evidence is positive but too small on seed 13.
+  \item Reproduce APA locally under the same miniVLA codebase, preprocessing, checkpoint, and evaluator stack used by RBTAD.
+  \item Complete the matched \liberocorelt{} 2$\times$2 ablation: BC, Rare-BC, TCAD-only, and RBTAD, all with the same seed, batch size, checkpoint source, and 30-rollout-per-task evaluator.
+  \item Add at least two more paired seeds for BC and RBTAD on \liberocorelt{} and report mean, variance, and per-task deltas.
+  \item Test APA+RBTAD after local APA is available. This is the key complementarity check: a positive result would support the claim that approach-trajectory coverage and task-conditioned action ambiguity are distinct bottlenecks.
+  \item Close the margin diagnostic loop by measuring pre/post instruction-action margins for BC, TCAD-only, Rare-BC, RBTAD, APA, and APA+RBTAD, then correlating per-task margin repair with closed-loop success gains.
+  \item Keep \liberospatiallt{} as an appendix/failure-boundary branch unless a reliable multi-seed method emerges; the current RSDF evidence is not strong enough to serve as a second main result.
 \end{itemize}
