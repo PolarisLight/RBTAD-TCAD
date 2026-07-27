@@ -10,6 +10,10 @@ RUN_STAMP=${RUN_STAMP:-20260728_apa_fullraw_seed7}
 RUN_ROOT=runs/core_lt_priority
 RESULT_ROOT=results/core_lt_priority
 
+active_pgrep() {
+  pgrep -af "$1" | grep -v 'bash -c bash -n' | grep -v 'bash -c .*nohup /mnt/data/cyh/run_' | grep -v 'pgrep -af'
+}
+
 OBJECT_FILES=(
   pick_up_the_alphabet_soup_and_place_it_in_the_basket_demo.hdf5
   pick_up_the_bbq_sauce_and_place_it_in_the_basket_demo.hdf5
@@ -68,16 +72,16 @@ wait_for_gpus() {
 
 wait_for_old_apa() {
   echo "== wait for old APA generator/pipeline to exit $(date -Is) =="
-  while pgrep -af "run_core_lt_apa_priority_23.sh|parallel_libero_dataset_regenerator.py --num-gpus 2" >/dev/null; do
-    pgrep -af "run_core_lt_apa_priority_23.sh|parallel_libero_dataset_regenerator.py --num-gpus 2" || true
+  while active_pgrep "run_core_lt_apa_priority_23.sh|parallel_libero_dataset_regenerator.py --num-gpus 2" >/dev/null; do
+    active_pgrep "run_core_lt_apa_priority_23.sh|parallel_libero_dataset_regenerator.py --num-gpus 2" || true
     sleep 900
   done
 }
 
 wait_for_rarebc_done() {
   echo "== wait for Rare-BC ablation to finish before APA GPU work $(date -Is) =="
-  while pgrep -af "run_core_lt_rarebc_seed7_23.sh|rarebc_libero_core_lt_w3_tail9_seed7_b20|parallel_libero_evaluator_egl.py.*rarebc_seed7" >/dev/null; do
-    pgrep -af "run_core_lt_rarebc_seed7_23.sh|rarebc_libero_core_lt_w3_tail9_seed7_b20|parallel_libero_evaluator_egl.py.*rarebc_seed7" || true
+  while active_pgrep "run_core_lt_rarebc_seed7_23.sh|rarebc_libero_core_lt_w3_tail9_seed7_b20|parallel_libero_evaluator_egl.py.*rarebc_seed7" >/dev/null; do
+    active_pgrep "run_core_lt_rarebc_seed7_23.sh|rarebc_libero_core_lt_w3_tail9_seed7_b20|parallel_libero_evaluator_egl.py.*rarebc_seed7" || true
     sleep 900
   done
 }

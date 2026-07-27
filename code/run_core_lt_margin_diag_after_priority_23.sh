@@ -8,11 +8,14 @@ DIAG_SCRIPT="$ROOT/code/diagnose_core_lt_margins.py"
 OUT_DIR="$ROOT/autoresearch/state/margin_diagnostics"
 
 log() { echo "[$(date -Is)] $*"; }
+active_pgrep() {
+  pgrep -af "$1" | grep -v 'bash -c bash -n' | grep -v 'bash -c .*nohup /mnt/data/cyh/run_' | grep -v 'pgrep -af'
+}
 
 wait_front_and_priority_done() {
   log "waiting for Rare-BC, APA, post-APA priority, and APA+RBTAD queues to finish"
-  while pgrep -af 'run_core_lt_rarebc_seed7_23.sh|rarebc_libero_core_lt_w3_tail9_seed7_b20|run_core_all_hf_download_then_apa_seed7_23.sh|core_all_hf_apa_seed7|run_core_lt_priority_after_apa_multiseed_23.sh|run_core_lt_apa_rbtad_after_priority_23.sh|apa_rbtad_libero_core_apa_w3_tail9_confmedian_seed7_b20' >/dev/null; do
-    pgrep -af 'run_core_lt_rarebc_seed7_23.sh|rarebc_libero_core_lt_w3_tail9_seed7_b20|run_core_all_hf_download_then_apa_seed7_23.sh|core_all_hf_apa_seed7|run_core_lt_priority_after_apa_multiseed_23.sh|run_core_lt_apa_rbtad_after_priority_23.sh|apa_rbtad_libero_core_apa_w3_tail9_confmedian_seed7_b20' || true
+  while active_pgrep 'run_core_lt_rarebc_seed7_23.sh|rarebc_libero_core_lt_w3_tail9_seed7_b20|run_core_all_hf_download_then_apa_seed7_23.sh|core_all_hf_apa_seed7|run_core_lt_priority_after_apa_multiseed_23.sh|run_core_lt_apa_rbtad_after_priority_23.sh|apa_rbtad_libero_core_apa_w3_tail9_confmedian_seed7_b20' >/dev/null; do
+    active_pgrep 'run_core_lt_rarebc_seed7_23.sh|rarebc_libero_core_lt_w3_tail9_seed7_b20|run_core_all_hf_download_then_apa_seed7_23.sh|core_all_hf_apa_seed7|run_core_lt_priority_after_apa_multiseed_23.sh|run_core_lt_apa_rbtad_after_priority_23.sh|apa_rbtad_libero_core_apa_w3_tail9_confmedian_seed7_b20' || true
     sleep 1800
   done
 }

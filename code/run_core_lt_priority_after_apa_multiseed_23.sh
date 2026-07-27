@@ -12,11 +12,14 @@ TASK_SUITE=libero_core
 UNNORM_KEY=libero_core_lt
 
 log() { echo "[$(date -Is)] $*"; }
+active_pgrep() {
+  pgrep -af "$1" | grep -v 'bash -c bash -n' | grep -v 'bash -c .*nohup /mnt/data/cyh/run_' | grep -v 'pgrep -af'
+}
 
 wait_for_front_queue() {
   log "waiting for Rare-BC + same-pipeline APA front queue to finish"
-  while pgrep -af 'run_core_lt_rarebc_seed7_23.sh|rarebc_libero_core_lt_w3_tail9_seed7_b20|run_core_all_hf_download_then_apa_seed7_23.sh|core_all_hf_apa_seed7' >/dev/null; do
-    pgrep -af 'run_core_lt_rarebc_seed7_23.sh|rarebc_libero_core_lt_w3_tail9_seed7_b20|run_core_all_hf_download_then_apa_seed7_23.sh|core_all_hf_apa_seed7' || true
+  while active_pgrep 'run_core_lt_rarebc_seed7_23.sh|rarebc_libero_core_lt_w3_tail9_seed7_b20|run_core_all_hf_download_then_apa_seed7_23.sh|core_all_hf_apa_seed7' >/dev/null; do
+    active_pgrep 'run_core_lt_rarebc_seed7_23.sh|rarebc_libero_core_lt_w3_tail9_seed7_b20|run_core_all_hf_download_then_apa_seed7_23.sh|core_all_hf_apa_seed7' || true
     sleep 1800
   done
 }
